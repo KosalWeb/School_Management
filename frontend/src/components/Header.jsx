@@ -65,7 +65,7 @@ const Header = ({ onMenuButtonClick, onQuickSearch }) => {
                         <FiMenu size={22} />
                     </button>
                     <div>
-                        <h1 className="text-lg font-semibold text-gray-700 hidden sm:block">ប្រព័ន្ធគ្រប់គ្រងគ្រូបង្រៀន</h1>
+                        <h1 className="text-lg font-semibold text-gray-700 hidden sm:block">ប្រព័ន្ធគ្រប់គ្រងសាលារៀន</h1>
                         <Breadcrumb />
                     </div>
                 </div>

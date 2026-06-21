@@ -23,7 +23,7 @@ const LoginPage = () => {
                         ចូលប្រើប្រព័ន្ធគ្រប់គ្រង
                     </h2>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        ប្រព័ន្ធគ្រប់គ្រងគ្រូបង្រៀន
+                        ប្រព័ន្ធគ្រប់គ្រងសាលារៀន
                     </p>
                 </div>
                 <form className="space-y-6" onSubmit={handleSubmit}>
