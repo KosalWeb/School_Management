@@ -1,0 +1,127 @@
+create and full code from this (note: in Khmer language frontend in khmer)
+
+
+# Frontend
+npm create vite@latest
+cd frontend
+npm install
+npm install axios react-router-dom sweetalert2 tailwindcss @tailwindcss/vite react-icons react-spinners
+# for config Tailwind
+    *vite.config.ts
+
+    import { defineConfig } from 'vite'
+    import tailwindcss from '@tailwindcss/vite'
+    export default defineConfig({
+    plugins: [
+    tailwindcss(),
+    ],
+    })
+    * src/index.css
+    @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&display=swap');
+    @import "tailwindcss";
+
+    body{
+    font-family: "Kantumruy Pro", sans-serif;
+    }
+
+# Backend (Create Folder)
+npm init -y
+npm install
+npm install express mongoose dotenv bcryptjs jsonwebtoken cors nodemon
+
+
+
+
+# Folder Structure
+School_Management/
+│
+├── backend/
+│   ├── config/
+│   │   └── db.js
+│   │
+│   ├── controllers/
+│   │   └── classesController.js
+│   │   └── studentsController.js
+│   │   └── subjectsController.js
+│   │   └── teachersConstroller.js
+│   │   └── userController.js
+│   │
+│   ├── middleware/
+│   │   └── authMiddleware.js
+│   │
+│   ├── models/
+│   │   └── ClassesModel.js.js
+│   │   └── StudentsModel.js
+│   │   └── SubjectsModel.js
+│   │   └── TeachersModel.js
+│   │   └── UserModel.js(role:superadmin,admin,dataentry,view)
+│   │
+│   ├── routes/
+│   │   └── classesRoutes.js
+│   │   └── studentsRoutes.js
+│   │   └── subjetsRoutes.js
+│   │   └── teachersRoutes.js
+│   │   └── userRoutes.js
+│   │
+│   ├── seeders/
+│   │   └── userSeeder.js (defalt role=superadmin email=superadmin@gmail.com password=123456 in .env)
+│   │
+│   ├── .env (MONGO_URI=mongodb://localhost:27017/your_database_name,PORT=5000,JWT_SECRET=your_jwt_name,JWT_EXPIRES_IN=1d,ADMIN_EMAIL=superadmin@gmail.com,ADMIN_PASSWORD=123456,ROLE=superadmin)
+│   └── server.js
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   │   ├── Loading.jsx
+│   │   │   │   |── PrivateRoute.jsx
+|   |   |   |   |── ErrorBoundary.jsx
+|   |   |   |   |── GenericForm.jsx
+|   |   |   |   |── GenericTable.jsx
+│   │   │   ├── Classes.jsx
+│   │   │   ├── Footer.jsx(© 2025 ប្រព័ន្ធគ្រប់គ្រងគ្រូបង្រៀន. រក្សាសិទ្ធិគ្រប់យ៉ាង)
+│   │   │   ├── Header.jsx (ប្រព័ន្ធគ្រប់គ្រងគ្រូបង្រៀន,User Account[dropdownlist=ប្រវត្តិរូប,ការកំណត់,អ្នកប្រើប្រាស់,ចាកចេញ])
+│   │   │   ├── Layout.jsx
+│   │   │   ├── Sidebar.jsx (ផ្ទាំងគ្រប់គ្រង,គ្រូបង្រៀន,សិស្ស,ថ្នាក់រៀន,មុខវិជ្ជា)
+│   │   │   ├── Students.jsx
+│   │   │   ├── Subjects.jsx
+│   │   │   ├── TeacherAttendance.jsx
+│   │   │   └── Teachers.jsx
+│   │   │
+│   │   ├── config/
+│   │   │   └── api.js
+│   │   │
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx
+│   │   │
+│   │   ├── data/
+│   │   │   ├── provinces.json
+│   │   │   ├── districts.json
+│   │   │   ├── khmer_lunar.json
+│   │   │   ├── communes.json
+│   │   │   └── villages.json
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── ClassesPage.jsx
+│   │   │   ├── DashboardPage.jsx
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── ProfilePage.jsx
+│   │   │   ├── SettingsPage.jsx
+│   │   │   ├── StudentsPage.jsx
+│   │   │   ├── SubjectsPage.jsx
+│   │   │   ├── TeacherAttendancePage.jsx
+│   │   │   ├── TeachersPage.jsx
+│   │   │   └── UsersPage.jsx
+│   │   │
+│   │   ├── utils/
+│   │   │   └── alert.js (using sweetalert2 in khmer language)
+│   │   │
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   │
+│   ├── .env (VITE_API_URL=http://localhost:5000/api)
+│   └── vite.config.js
+│
+├── package.json
+└── README.md

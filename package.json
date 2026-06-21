@@ -1,0 +1,61 @@
+{
+    "name": "school-management",
+    "version": "1.0.0",
+    "description": "School Management Desktop Application",
+    "main": "electron/main.cjs",
+    "private": true,
+    "scripts": {
+        "postinstall": "cd backend && npm install && cd ../frontend && npm install",
+        "dev:frontend": "cd frontend && npm run dev",
+        "dev:backend": "cd backend && npm run dev",
+        "build:frontend": "cd frontend && npm run build",
+        "electron:dev": "npm run build:frontend && electron .",
+        "electron:build:win": "npm run build:frontend && node scripts/package.js",
+        "electron:dist:win": "npm run build:frontend && electron-builder --win --x64"
+    },
+    "build": {
+        "appId": "com.school.management",
+        "productName": "School Management",
+        "directories": {
+            "output": "release/installer"
+        },
+        "files": [
+            "electron/**/*",
+            "package.json"
+        ],
+        "extraResources": [
+            {
+                "from": "backend",
+                "to": "backend"
+            },
+            {
+                "from": "frontend/dist",
+                "to": "frontend/dist"
+            }
+        ],
+        "afterPack": "scripts/afterPack.js",
+        "win": {
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": ["x64"]
+                }
+            ],
+            "icon": null
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": false,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "shortcutName": "School Management",
+            "uninstallDisplayName": "School Management"
+        }
+    },
+    "devDependencies": {
+        "electron": "^33.0.0",
+        "electron-builder": "^26.15.3",
+        "electron-packager": "^17.1.2"
+    }
+}
