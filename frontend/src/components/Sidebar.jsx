@@ -93,7 +93,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 <div className="flex items-center p-4 border-b border-gray-700">
                     <div className="flex items-center gap-2">
                         <FaSchool className="text-accent text-xl" />
-                        <span className="text-lg font-bold">Teacher Manage</span>
+                        <span className="text-lg font-bold">School Management</span>
                     </div>
                 </div>
 
