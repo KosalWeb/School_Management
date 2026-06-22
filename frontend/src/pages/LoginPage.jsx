@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { FaSchool, FaSpinner } from 'react-icons/fa';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FaSchool, FaSpinner, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import api from '../config/api';
+import { showSuccessToast, showErrorToast } from '../utils/alert';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('superadmin@gmail.com');
     const [password, setPassword] = useState('123456');
     const [rememberPassword, setRememberPassword] = useState(false);
+    const [showSuperadminForm, setShowSuperadminForm] = useState(false);
+    const [saName, setSaName] = useState('');
+    const [saEmail, setSaEmail] = useState('');
+    const [saPassword, setSaPassword] = useState('');
+
+    const [saLoading, setSaLoading] = useState(false);
     const { login, loading } = useAuth();
 
     useEffect(() => {
@@ -18,6 +26,18 @@ const LoginPage = () => {
         }
     }, []);
 
+    const handleKeyDown = useCallback((e) => {
+        if (e.ctrlKey && e.shiftKey && e.altKey) {
+            e.preventDefault();
+            setShowSuperadminForm((prev) => !prev);
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [handleKeyDown]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (rememberPassword) {
@@ -28,6 +48,28 @@ const LoginPage = () => {
             localStorage.removeItem('rememberedPassword');
         }
         login(email, password);
+    };
+
+    const handleSuperadminSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            setSaLoading(true);
+            await api.post('/users/register-superadmin', {
+                name: saName,
+                email: saEmail,
+                password: saPassword,
+            });
+            showSuccessToast('Superadmin created successfully!');
+            setShowSuperadminForm(false);
+            setSaName('');
+            setSaEmail('');
+            setSaPassword('');
+        } catch (error) {
+            const message = error.response?.data?.message || 'Failed to create superadmin';
+            showErrorToast(message);
+        } finally {
+            setSaLoading(false);
+        }
     };
 
     return (
@@ -98,6 +140,61 @@ const LoginPage = () => {
                     </button>
                 </form>
             </div>
+            {showSuperadminForm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 w-full max-w-md mx-4">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Create Superadmin</h3>
+                            <button
+                                type="button"
+                                onClick={() => setShowSuperadminForm(false)}
+                                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                            >
+                                <FaTimes />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSuperadminSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={saName}
+                                    onChange={(e) => setSaName(e.target.value)}
+                                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={saEmail}
+                                    onChange={(e) => setSaEmail(e.target.value)}
+                                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={saPassword}
+                                    onChange={(e) => setSaPassword(e.target.value)}
+                                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={saLoading}
+                                className="w-full py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-light disabled:opacity-60 transition-colors"
+                            >
+                                {saLoading ? <FaSpinner className="animate-spin mx-auto" /> : 'Create Superadmin'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

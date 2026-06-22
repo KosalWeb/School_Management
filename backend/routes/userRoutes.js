@@ -6,11 +6,13 @@ import {
     getUsers,
     updateUser,
     deleteUser,
-    updateUserPassword
+    updateUserPassword,
+    registerSuperadmin
 } from '../controllers/userController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 router.post('/login', authUser);
+router.post('/register-superadmin', registerSuperadmin);
 
 router.route('/')
     .post(protect, authorize('superadmin', 'school-admin'), registerUser)
