@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
-import { FiUser, FiSettings, FiLogOut, FiUserPlus, FiMenu, FiSun, FiMoon } from 'react-icons/fi';
+import { FiUser, FiSettings, FiLogOut, FiUserPlus, FiMenu, FiSun, FiMoon, FiKey, FiInfo } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext.jsx';
+import AboutModal from './common/AboutModal.jsx';
 
 const ROUTE_LABELS = {
     '/': 'ផ្ទាំងគ្រប់គ្រង',
@@ -40,6 +41,7 @@ const Header = ({ onMenuButtonClick, onQuickSearch }) => {
     const { user, logout } = useAuth();
     const { dark, toggle: toggleTheme } = useTheme();
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [aboutOpen, setAboutOpen] = useState(false);
     const dropdownRef = useRef(null);
 
     useEffect(() => {
@@ -58,6 +60,7 @@ const Header = ({ onMenuButtonClick, onQuickSearch }) => {
     };
 
     return (
+        <>
         <header className="bg-white border-b px-4 py-3 no-print">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -107,6 +110,14 @@ const Header = ({ onMenuButtonClick, onQuickSearch }) => {
                                         <FiUserPlus className="mr-2" /> បង្កើតអ្នកប្រើប្រាស់
                                     </Link>
                                 )}
+                                <hr className="border-gray-100" />
+                                <Link to="/license" onClick={() => setDropdownOpen(false)} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <FiKey className="mr-2" /> លិខិតអនុញ្ញាត
+                                </Link>
+                                <button onClick={() => { setDropdownOpen(false); setAboutOpen(true); }} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <FiInfo className="mr-2" /> អំពីកម្មវិធី
+                                </button>
+                                <hr className="border-gray-100" />
                                 <button onClick={handleLogout} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <FiLogOut className="mr-2" /> ចាកចេញ
                                 </button>
@@ -116,6 +127,8 @@ const Header = ({ onMenuButtonClick, onQuickSearch }) => {
                 </div>
             </div>
         </header>
+        <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
+        </>
     );
 };
 

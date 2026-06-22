@@ -3,10 +3,12 @@ import { ThemeProvider } from './context/ThemeContext';
 
 // Layout and Common Components
 import Layout from './components/Layout';
-import PrivateRoute from './components/common/PrivateRoute'; // Assuming this checks if user is logged in
-import ProtectedRoute from './components/ProtectedRoute';   // This checks user role
+import PrivateRoute from './components/common/PrivateRoute';
+import ProtectedRoute from './components/ProtectedRoute';
+import LicenseGuard from './components/common/LicenseGuard';
 
 // Page Components
+import LicensePage from './pages/LicensePage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import SchoolsPage from './pages/SchoolsPage';
@@ -31,32 +33,34 @@ function App() {
     <ThemeProvider>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+      <Route path="/license" element={<LicensePage />} />
+      <Route element={<LicenseGuard />}>
+        <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
 
-        {/* --- General Routes (Accessible to all logged-in users) --- */}
-        <Route index element={<DashboardPage />} />
-        <Route path="classes" element={<ClassesPage />} />
-        <Route path="students" element={<StudentsPage />} />
-        <Route path="attendance" element={<TeacherAttendancePage />} />
-        <Route path="student-attendance" element={<StudentAttendancePage />} />
-        <Route path="honor-table" element={<HonorTablePage />} />
-        <Route path="profile" element={<ProfilePage />} />
+          {/* --- General Routes (Accessible to all logged-in users) --- */}
+          <Route index element={<DashboardPage />} />
+          <Route path="classes" element={<ClassesPage />} />
+          <Route path="students" element={<StudentsPage />} />
+          <Route path="attendance" element={<TeacherAttendancePage />} />
+          <Route path="student-attendance" element={<StudentAttendancePage />} />
+          <Route path="honor-table" element={<HonorTablePage />} />
+          <Route path="profile" element={<ProfilePage />} />
 
-        {/* --- Admin-Only Routes --- */}
-        {/* These routes are wrapped and will only be accessible to the roles defined below. */}
-        <Route element={<ProtectedRoute allowedRoles={['superadmin', 'school-admin']} />}>
-          <Route path="schools" element={<SchoolsPage />} />
-          <Route path="teachers" element={<TeachersPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="subjects" element={<SubjectsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="reports" element={<ReportPage />} />
-          <Route path="teacher-attendance-report" element={<TeacherAttendanceReportPage />} />
-          <Route path="student-attendance-report" element={<StudentAttendanceReportPage />} />
-          <Route path="student-score" element={<StudentScorePage />} />
-          <Route path="student-score-list" element={<StudentScoreListPage />} />
+          {/* --- Admin-Only Routes --- */}
+          <Route element={<ProtectedRoute allowedRoles={['superadmin', 'school-admin']} />}>
+            <Route path="schools" element={<SchoolsPage />} />
+            <Route path="teachers" element={<TeachersPage />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="subjects" element={<SubjectsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="reports" element={<ReportPage />} />
+            <Route path="teacher-attendance-report" element={<TeacherAttendanceReportPage />} />
+            <Route path="student-attendance-report" element={<StudentAttendanceReportPage />} />
+            <Route path="student-score" element={<StudentScorePage />} />
+            <Route path="student-score-list" element={<StudentScoreListPage />} />
+          </Route>
+
         </Route>
-
       </Route>
     </Routes>
     </ThemeProvider>

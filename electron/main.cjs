@@ -1,6 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
+const { checkLicense, activate, getMachineId } = require('./license.cjs');
 
 let mainWindow;
 let serverProcess;
@@ -74,11 +75,19 @@ function createWindow(port) {
     });
 }
 
+ipcMain.handle('license:status', () => checkLicense(app));
+ipcMain.handle('license:activate', (_e, key, expiresAt) => activate(app, key, expiresAt));
+ipcMain.handle('license:machineId', () => getMachineId());
+
 app.whenReady().then(async () => {
     try {
         const port = await startBackend();
-        console.log(`Backend ready on port ${port}, launching window...`);
+        const license = checkLicense(app);
+        console.log(`Backend ready on port ${port}, license:`, license.status);
         createWindow(port);
+        mainWindow.webContents.on('did-finish-load', () => {
+            mainWindow.webContents.send('license:status', license);
+        });
     } catch (err) {
         console.error('Failed to start backend:', err);
         app.quit();
