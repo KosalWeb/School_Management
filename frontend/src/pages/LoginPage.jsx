@@ -1,14 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaSchool, FaSpinner } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('superadmin@gmail.com');
     const [password, setPassword] = useState('123456');
+    const [rememberPassword, setRememberPassword] = useState(false);
     const { login, loading } = useAuth();
+
+    useEffect(() => {
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        const savedPassword = localStorage.getItem('rememberedPassword');
+        if (savedEmail && savedPassword) {
+            setEmail(savedEmail);
+            setPassword(savedPassword);
+            setRememberPassword(true);
+        }
+    }, []);
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (rememberPassword) {
+            localStorage.setItem('rememberedEmail', email);
+            localStorage.setItem('rememberedPassword', password);
+        } else {
+            localStorage.removeItem('rememberedEmail');
+            localStorage.removeItem('rememberedPassword');
+        }
         login(email, password);
     };
 
@@ -58,6 +76,18 @@ const LoginPage = () => {
                             className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-primary-light transition dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             placeholder="••••••"
                         />
+                    </div>
+                    <div className="flex items-center">
+                        <input
+                            id="remember"
+                            type="checkbox"
+                            checked={rememberPassword}
+                            onChange={(e) => setRememberPassword(e.target.checked)}
+                            className="h-4 w-4 text-primary focus:ring-primary-light border-gray-300 rounded"
+                        />
+                        <label htmlFor="remember" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                            ចងចាំពាក្យសម្ងាត់
+                        </label>
                     </div>
                     <button
                         type="submit"
