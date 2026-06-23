@@ -25,6 +25,10 @@ const userSchema = mongoose.Schema(
                 ref: 'Class',
             },
         ],
+        expiredDate: {
+            type: Date,
+            default: null,
+        },
     },
     {
         timestamps: true,

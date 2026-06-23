@@ -67,6 +67,10 @@ const UsersPage = () => {
             setValue('role', user.role);
             if (user.school) setValue('school', user.school._id);
             if (user.classes) setValue('classes', user.classes.map(c => c._id));
+            if (user.expiredDate) {
+                const d = new Date(user.expiredDate);
+                setValue('expiredDate', d.toISOString().split('T')[0]);
+            }
         } else {
             if (loggedInUser.role === 'school-admin') {
                 setValue('school', loggedInUser.school);
@@ -152,6 +156,7 @@ const UsersPage = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">School</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Class</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expires</th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
@@ -164,6 +169,16 @@ const UsersPage = () => {
                                 <td className="px-6 py-4 whitespace-nowrap">{user.school?.schoolName || 'N/A'}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {user.classes?.length > 0 ? user.classes.map(c => c.className).join(', ') : 'N/A'}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    {user.expiredDate ? (
+                                        <span className={new Date(user.expiredDate) < new Date() ? 'text-red-600 font-semibold' : 'text-green-600'}>
+                                            {new Date(user.expiredDate).toLocaleDateString()}
+                                            {new Date(user.expiredDate) < new Date() && ' (Expired)'}
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-400">Never</span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <button onClick={() => openPasswordModal(user)} className="text-gray-500 hover:text-yellow-600 mr-4"><FiKey /></button>
@@ -206,6 +221,11 @@ const UsersPage = () => {
                                 <option value="superadmin">Super Admin</option>
                             )}
                         </select>
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Account Expiration Date</label>
+                        <input type="date" {...register('expiredDate')} className="w-full px-3 py-2 border rounded" />
+                        <p className="text-xs text-gray-500 mt-1">Leave empty for no expiration</p>
                     </div>
                     {loggedInUser.role === 'superadmin' && (selectedRole === 'school-admin' || selectedRole === 'teacher' || selectedRole === 'data-entry') && (
                         <div className="mb-4">

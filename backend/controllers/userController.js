@@ -12,12 +12,16 @@ const authUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
+        if (user.expiredDate && new Date() > new Date(user.expiredDate)) {
+            return res.status(401).json({ message: 'គណនីរបស់អ្នកផុតកំណត់ហើយ។ សូមទាក់ទងអ្នកគ្រប់គ្រងប្រព័ន្ធ' });
+        }
         res.json({
             _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
             school: user.school,
+            expiredDate: user.expiredDate,
             token: generateToken(user._id),
         });
     } else {
@@ -26,14 +30,14 @@ const authUser = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-    const { name, email, password, role, school, classes } = req.body;
+    const { name, email, password, role, school, classes, expiredDate } = req.body;
     const userExists = await User.findOne({ email });
 
     if (userExists) {
         return res.status(400).json({ message: 'User already exists' });
     }
 
-    const user = await User.create({ name, email, password, role, school, classes });
+    const user = await User.create({ name, email, password, role, school, classes, expiredDate });
 
     if (user) {
         const populatedUser = await User.findById(user._id)
@@ -43,6 +47,7 @@ const registerUser = async (req, res) => {
 
         res.status(201).json({
             ...populatedUser.toObject(),
+            expiredDate: user.expiredDate,
             token: generateToken(user._id),
         });
     } else {
@@ -74,6 +79,9 @@ const updateUser = async (req, res) => {
         user.email = req.body.email || user.email;
         const newRole = req.body.role || user.role;
         user.role = newRole;
+        if (req.body.expiredDate !== undefined) {
+            user.expiredDate = req.body.expiredDate || null;
+        }
 
         if (newRole === 'teacher' || newRole === 'data-entry') {
             user.school = req.body.school;
@@ -143,6 +151,7 @@ const registerSuperadmin = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            expiredDate: user.expiredDate,
             token: generateToken(user._id),
         });
     } else {
