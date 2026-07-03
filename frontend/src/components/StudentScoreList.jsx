@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import api from '../config/api';
 import { ClipLoader } from 'react-spinners';
 import { showErrorToast } from '../utils/alert';
+import * as XLSX from 'xlsx';
 
 const MONTHS = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
 const EXAM_TYPES = [...MONTHS, 'ឆមាសទី១', 'ឆមាសទី២'];
@@ -129,6 +130,36 @@ const StudentScoreList = () => {
         return stats;
     }, [students, allSubjects, scoreMap, showAllExamTypes, examType]);
 
+    const exportToExcel = () => {
+        const headers = ['ល.រ', 'លេខសម្គាល់', 'គោត្តនាម និងនាម'];
+        if (showAllExamTypes) {
+            allSubjects.forEach((subj) => EXAM_TYPES.forEach((et) => headers.push(`${subj.subjectName} (${et})`)));
+        } else {
+            allSubjects.forEach((subj) => headers.push(subj.subjectName));
+        }
+        headers.push('សរុប', 'មធ្យម', 'កម្រិត', 'លទ្ធផល', 'ចំណាត់ថ្នាក់');
+
+        const dataRows = students.map((student, i) => {
+            const stats = studentStats[student._id];
+            const row = [i + 1, student.studentId, student.fullNameKh];
+            allSubjects.forEach((subj) => {
+                const score = getScore(student._id, subj._id);
+                if (showAllExamTypes && Array.isArray(score)) {
+                    score.forEach((s) => row.push(s !== undefined ? s : ''));
+                } else {
+                    row.push(score !== undefined ? score : '');
+                }
+            });
+            row.push(stats?.total ?? '', stats?.avg ?? '', getMention(stats?.avg), getResult(stats?.avg), stats?.rank ?? '');
+            return row;
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...dataRows]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'StudentScores');
+        XLSX.writeFile(wb, `Student_Scores.xlsx`);
+    };
+
     return (
         <div>
             <h1 className="text-3xl font-bold text-gray-800 mb-6">បញ្ជីពិន្ទុសិស្ស</h1>
@@ -213,6 +244,11 @@ const StudentScoreList = () => {
 
             {!isLoading && students.length > 0 && (
                 <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="flex justify-end p-4 pb-0">
+                        <button onClick={exportToExcel} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium">
+                            Export to Excel
+                        </button>
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm border-collapse">
                             <thead className="bg-gray-50">
