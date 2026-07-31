@@ -5,10 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/Layout';
 import PrivateRoute from './components/common/PrivateRoute';
 import ProtectedRoute from './components/ProtectedRoute';
-import LicenseGuard from './components/common/LicenseGuard';
-
 // Page Components
-import LicensePage from './pages/LicensePage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import SchoolsPage from './pages/SchoolsPage';
@@ -33,9 +30,7 @@ function App() {
     <ThemeProvider>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/license" element={<LicensePage />} />
-      <Route element={<LicenseGuard />}>
-        <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+      <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
 
           {/* --- General Routes (Accessible to all logged-in users) --- */}
           <Route index element={<DashboardPage />} />
@@ -61,7 +56,6 @@ function App() {
           </Route>
 
         </Route>
-      </Route>
     </Routes>
     </ThemeProvider>
   );
