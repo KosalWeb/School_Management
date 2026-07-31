@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaTachometerAlt, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaBook, FaUniversity, FaChartBar, FaTimes, FaCheckCircle, FaClipboardList, FaCalendarAlt, FaAward, FaPenAlt, FaChevronDown, FaChevronRight, FaCog, FaUserCheck, FaUsers } from 'react-icons/fa';
+import { FaTachometerAlt, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaBook, FaUniversity, FaChartBar, FaTimes, FaCheckCircle, FaClipboardList, FaCalendarAlt, FaAward, FaPenAlt, FaChevronDown, FaChevronRight, FaCog, FaUserCheck, FaUsers, FaClock, FaMoneyBillWave } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
 const SIDEBAR_NAV = {
@@ -20,6 +20,7 @@ const SIDEBAR_NAV = {
       { to: '/subjects', label: 'មុខវិជ្ជា', icon: FaBook, roles: ['superadmin', 'school-admin'] },
       { to: '/classes', label: 'ថ្នាក់រៀន', icon: FaSchool, roles: ['*'] },
       { to: '/students', label: 'សិស្ស', icon: FaUserGraduate, roles: ['*'] },
+      { to: '/timetable', label: 'កាលវិភាគបង្រៀន', icon: FaClock, roles: ['*'] },
     ],
   },
   attendance: {
@@ -39,6 +40,14 @@ const SIDEBAR_NAV = {
       { to: '/honor-table', label: 'តារាងកិត្តិយស', icon: FaAward, roles: ['*'] },
     ],
   },
+  finance: {
+    label: 'ហិរញ្ញវត្ថុ',
+    icon: FaMoneyBillWave,
+    items: [
+      { to: '/fee-types', label: 'ប្រភេទថ្លៃ', icon: FaMoneyBillWave, roles: ['superadmin', 'school-admin'] },
+      { to: '/fee-payments', label: 'ការបង់ប្រាក់', icon: FaCheckCircle, roles: ['*'] },
+    ],
+  },
   reports: {
     label: 'របាយការណ៍',
     icon: FaChartBar,
@@ -46,6 +55,7 @@ const SIDEBAR_NAV = {
       { to: '/reports', label: 'របាយការណ៍', icon: FaChartBar, roles: ['superadmin', 'school-admin'] },
       { to: '/teacher-attendance-report', label: 'របាយការណ៍វត្តមានគ្រូ', icon: FaCalendarAlt, roles: ['superadmin', 'school-admin'] },
       { to: '/student-attendance-report', label: 'របាយការណ៍វត្តមានសិស្ស', icon: FaClipboardList, roles: ['superadmin', 'school-admin'] },
+      { to: '/report-card', label: 'ប័ណ្ណពិន្ទុសិស្ស', icon: FaAward, roles: ['*'] },
     ],
   },
 };

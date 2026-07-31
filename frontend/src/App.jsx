@@ -24,6 +24,10 @@ import StudentAttendanceReportPage from './pages/StudentAttendanceReportPage';
 import StudentScorePage from './pages/StudentScorePage';
 import StudentScoreListPage from './pages/StudentScoreListPage';
 import HonorTablePage from './pages/HonorTablePage';
+import ReportCardPage from './pages/ReportCardPage';
+import TimetablePage from './pages/TimetablePage';
+import FeeTypesPage from './pages/FeeTypesPage';
+import FeePaymentsPage from './pages/FeePaymentsPage';
 
 function App() {
   return (
@@ -40,6 +44,9 @@ function App() {
           <Route path="student-attendance" element={<StudentAttendancePage />} />
           <Route path="honor-table" element={<HonorTablePage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="timetable" element={<TimetablePage />} />
+          <Route path="fee-payments" element={<FeePaymentsPage />} />
+          <Route path="report-card" element={<ReportCardPage />} />
 
           {/* --- Admin-Only Routes --- */}
           <Route element={<ProtectedRoute allowedRoles={['superadmin', 'school-admin']} />}>
@@ -53,6 +60,7 @@ function App() {
             <Route path="student-attendance-report" element={<StudentAttendanceReportPage />} />
             <Route path="student-score" element={<StudentScorePage />} />
             <Route path="student-score-list" element={<StudentScoreListPage />} />
+            <Route path="fee-types" element={<FeeTypesPage />} />
           </Route>
 
         </Route>

@@ -21,6 +21,10 @@ import studentAttendanceRoutes from './routes/studentAttendanceRoutes.js';
 import destroyRoutes from './routes/destroyRoutes.js';
 import seedRoutes from './routes/seedRoutes.js';
 import studentScoreRoutes from './routes/studentScoreRoutes.js';
+import reportCardRoutes from './routes/reportCardRoutes.js';
+import timetableRoutes from './routes/timetableRoutes.js';
+import feeTypeRoutes from './routes/feeTypeRoutes.js';
+import feePaymentRoutes from './routes/feePaymentRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,6 +58,10 @@ app.use('/api/student-attendance', studentAttendanceRoutes);
 app.use('/api/destroy', destroyRoutes);
 app.use('/api/seed', seedRoutes);
 app.use('/api/student-scores', studentScoreRoutes);
+app.use('/api/report-card', reportCardRoutes);
+app.use('/api/timetable', timetableRoutes);
+app.use('/api/fee-types', feeTypeRoutes);
+app.use('/api/fee-payments', feePaymentRoutes);
 
 // --- Serve built frontend ---
 app.use(express.static(frontendDist));

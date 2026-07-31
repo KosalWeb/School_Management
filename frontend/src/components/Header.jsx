@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Link, useLocation } from 'react-router-dom';
-import { FiUser, FiSettings, FiLogOut, FiUserPlus, FiMenu, FiSun, FiMoon, FiKey, FiInfo } from 'react-icons/fi';
+import { FiUser, FiSettings, FiLogOut, FiUserPlus, FiMenu, FiSun, FiMoon, FiInfo } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext.jsx';
 import AboutModal from './common/AboutModal.jsx';
 
@@ -110,10 +110,6 @@ const Header = ({ onMenuButtonClick, onQuickSearch }) => {
                                         <FiUserPlus className="mr-2" /> បង្កើតអ្នកប្រើប្រាស់
                                     </Link>
                                 )}
-                                <hr className="border-gray-100" />
-                                <Link to="/license" onClick={() => setDropdownOpen(false)} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <FiKey className="mr-2" /> លិខិតអនុញ្ញាត
-                                </Link>
                                 <button onClick={() => { setDropdownOpen(false); setAboutOpen(true); }} className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <FiInfo className="mr-2" /> អំពីកម្មវិធី
                                 </button>
