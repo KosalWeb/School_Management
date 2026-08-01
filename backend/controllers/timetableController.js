@@ -1,4 +1,5 @@
 import Timetable from '../models/TimetableModel.js';
+import Class from '../models/ClassModel.js';
 
 export const getTimetable = async (req, res) => {
     try {
@@ -19,6 +20,7 @@ export const getTimetable = async (req, res) => {
             .sort({ dayOfWeek: 1, startTime: 1 });
         res.json(entries);
     } catch (error) {
+        console.error('Get timetable error:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 };
@@ -32,6 +34,7 @@ export const getTimetableGrid = async (req, res) => {
             .sort({ dayOfWeek: 1, startTime: 1 });
         res.json(entries);
     } catch (error) {
+        console.error('Get timetable grid error:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 };
@@ -39,11 +42,18 @@ export const getTimetableGrid = async (req, res) => {
 export const createTimetableEntry = async (req, res) => {
     try {
         const { class: classId, subject, teacher, dayOfWeek, startTime, endTime, room } = req.body;
-        const existing = await Timetable.findOne({ class: classId, dayOfWeek, startTime });
+        let school = req.body.school || req.user.school;
+        if (!school && classId) {
+            const classDoc = await Class.findById(classId).select('school');
+            if (classDoc) school = classDoc.school;
+        }
+        if (!school) {
+            return res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ - សាលារៀនមិនត្រូវបានបញ្ជាក់' });
+        }
+        const existing = await Timetable.findOne({ school, class: classId, dayOfWeek, startTime });
         if (existing) {
             return res.status(400).json({ message: 'ម៉ោងនេះមានរួចហើយសម្រាប់ថ្ងៃនេះ' });
         }
-        const school = req.user.role === 'superadmin' ? req.body.school : req.user.school;
         const entry = await Timetable.create({
             school, class: classId, subject, teacher, dayOfWeek, startTime, endTime, room: room || '',
             createdBy: req.user._id
@@ -51,7 +61,13 @@ export const createTimetableEntry = async (req, res) => {
         const populated = await entry.populate(['subject', 'teacher', 'class']);
         res.status(201).json(populated);
     } catch (error) {
-        res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ', errors: error.errors });
+        console.error('Create timetable error:', error);
+        const message = error.name === 'ValidationError'
+            ? Object.values(error.errors).map(e => e.message).join(', ')
+            : error.code === 11000
+                ? 'ម៉ោងនេះមានរួចហើយសម្រាប់ថ្ងៃនេះ'
+                : 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ';
+        res.status(400).json({ message });
     }
 };
 
@@ -59,12 +75,19 @@ export const updateTimetableEntry = async (req, res) => {
     try {
         const entry = await Timetable.findById(req.params.id);
         if (!entry) return res.status(404).json({ message: 'រកមិនឃើញទេ' });
-        Object.assign(entry, req.body);
+        const { subject, teacher, dayOfWeek, startTime, endTime, room } = req.body;
+        if (subject !== undefined) entry.subject = subject;
+        if (teacher !== undefined) entry.teacher = teacher;
+        if (dayOfWeek !== undefined) entry.dayOfWeek = dayOfWeek;
+        if (startTime !== undefined) entry.startTime = startTime;
+        if (endTime !== undefined) entry.endTime = endTime;
+        if (room !== undefined) entry.room = room;
         const updated = await entry.save();
         const populated = await updated.populate(['subject', 'teacher', 'class']);
         res.json(populated);
     } catch (error) {
-        res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ', errors: error.errors });
+        console.error('Update timetable error:', error);
+        res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ' });
     }
 };
 
@@ -75,6 +98,7 @@ export const deleteTimetableEntry = async (req, res) => {
         await entry.deleteOne();
         res.json({ message: 'បានលុបដោយជោគជ័យ' });
     } catch (error) {
+        console.error('Delete timetable error:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 };

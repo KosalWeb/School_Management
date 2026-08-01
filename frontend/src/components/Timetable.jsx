@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../config/api';
+import { useAuth } from '../context/AuthContext';
 import { showSuccessToast, showErrorToast, showConfirmDialog } from '../utils/alert';
 import { TableSkeleton } from './common/Skeleton';
 import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
@@ -7,6 +8,9 @@ import { FaPlus, FaEdit, FaTrash, FaTimes } from 'react-icons/fa';
 const DAYS = ['ច័ន្ទ', 'អង្គារ', 'ពុធ', 'ព្រហស្បតិ៍', 'សុក្រ', 'សៅរ៍'];
 
 const Timetable = () => {
+    const { user } = useAuth();
+    const [schools, setSchools] = useState([]);
+    const [selectedSchool, setSelectedSchool] = useState('');
     const [classes, setClasses] = useState([]);
     const [selectedClass, setSelectedClass] = useState('');
     const [entries, setEntries] = useState([]);
@@ -19,17 +23,23 @@ const Timetable = () => {
     const [selectedDay, setSelectedDay] = useState(null);
 
     useEffect(() => {
-        Promise.all([
-            api.get('/classes'),
-            api.get('/subjects'),
-            api.get('/teachers'),
-        ]).then(([c, s, t]) => {
-            setClasses(c.data);
-            setSubjects(s.data);
-            setTeachers(t.data);
-        }).catch(() => showErrorToast('មិនអាចទាញយកទិន្នន័យបានទេ'))
-        .finally(() => setIsLoading(false));
-    }, []);
+        if (user?.role === 'superadmin') {
+            api.get('/schools').then(({ data }) => setSchools(data)).catch(() => {});
+        }
+    }, [user]);
+
+    const schoolId = user?.role === 'superadmin' ? selectedSchool : user?.school;
+
+    useEffect(() => {
+        setSelectedClass('');
+        if (schoolId) {
+            api.get(`/classes?school=${schoolId}`).then(({ data }) => setClasses(data)).catch(() => setClasses([]));
+            api.get('/subjects').then(({ data }) => setSubjects(data)).catch(() => setSubjects([]));
+            api.get(`/teachers?organization=${schoolId}`).then(({ data }) => setTeachers(data)).catch(() => setTeachers([]));
+        } else {
+            setClasses([]); setSubjects([]); setTeachers([]);
+        }
+    }, [schoolId]);
 
     const fetchTimetable = useCallback(async () => {
         if (!selectedClass) { setEntries([]); return; }
@@ -43,7 +53,7 @@ const Timetable = () => {
 
     useEffect(() => { fetchTimetable(); }, [fetchTimetable]);
 
-    const timeSlots = [...new Set(entries.map(e => `${e.startTime}-${e.endTime}`))].sort();
+    const timeSlots = [...new Set(entries.map(e => `${e.startTime}-${e.endTime}`))].sort((a, b) => a.split('-')[0].localeCompare(b.split('-')[0]));
 
     const grid = {};
     entries.forEach(e => {
@@ -59,6 +69,13 @@ const Timetable = () => {
         setShowModal(true);
     };
 
+    const openAddNew = () => {
+        setSelectedDay(null);
+        setEditEntry(null);
+        setForm({ subject: '', teacher: '', startTime: '', endTime: '', room: '' });
+        setShowModal(true);
+    };
+
     const openEdit = (entry) => {
         setSelectedDay(entry.dayOfWeek);
         setEditEntry(entry);
@@ -68,12 +85,13 @@ const Timetable = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.subject || !form.teacher || !form.startTime || !form.endTime) {
+        if (!form.subject || !form.teacher || !form.startTime || !form.endTime || selectedDay === null) {
             showErrorToast('សូមបំពេញព័ត៌មានទាំងអស់');
             return;
         }
         try {
             const payload = { ...form, class: selectedClass, dayOfWeek: selectedDay };
+            if (schoolId) payload.school = schoolId;
             if (editEntry) {
                 await api.put(`/timetable/${editEntry._id}`, payload);
                 showSuccessToast('បានកែសម្រួលកាលវិភាគ');
@@ -103,20 +121,55 @@ const Timetable = () => {
         });
     };
 
+    const handleDeleteSlot = (slot) => {
+        const [start, end] = slot.split('-');
+        const slotEntries = entries.filter(e => e.startTime === start && e.endTime === end);
+        if (slotEntries.length === 0) return;
+        showConfirmDialog({
+            title: `លុបជួរម៉ោង ${start} - ${end}?`,
+            text: `ការលុបនេះនឹងលុបធាតុ ${slotEntries.length} ចេញ`,
+            onConfirm: async () => {
+                try {
+                    await Promise.all(slotEntries.map(e => api.delete(`/timetable/${e._id}`)));
+                    showSuccessToast('បានលុបជួរដេកដោយជោគជ័យ');
+                    fetchTimetable();
+                } catch {
+                    showErrorToast('មិនអាចលុបបានទេ');
+                }
+            },
+        });
+    };
+
     if (isLoading) return <div className="p-4"><TableSkeleton rows={5} columns={5} /></div>;
 
     return (
         <div className="p-4">
             <h1 className="text-2xl font-bold mb-4">កាលវិភាគបង្រៀន</h1>
 
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">ជ្រើសរើសថ្នាក់</label>
-                <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} className="p-2 border rounded w-full max-w-xs">
-                    <option value="">-- ជ្រើសរើសថ្នាក់ --</option>
-                    {classes.map(c => (
-                        <option key={c._id} value={c._id}>{c.className} ({c.classCode})</option>
-                    ))}
-                </select>
+            <div className="mb-4 flex flex-wrap items-end gap-4">
+                {user?.role === 'superadmin' && (
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">សាលារៀន</label>
+                        <select value={selectedSchool} onChange={e => setSelectedSchool(e.target.value)} className="p-2 border rounded w-full max-w-xs">
+                            <option value="">-- ជ្រើសរើសសាលា --</option>
+                            {schools.map(s => (
+                                <option key={s._id} value={s._id}>{s.schoolName}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+                <div className={user?.role === 'superadmin' ? '' : 'flex-1'}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">ថ្នាក់</label>
+                    <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)} className="p-2 border rounded w-full max-w-xs" disabled={!schoolId}>
+                        <option value="">-- ជ្រើសរើសថ្នាក់ --</option>
+                        {classes.map(c => (
+                            <option key={c._id} value={c._id}>{c.className} ({c.classCode})</option>
+                        ))}
+                    </select>
+                </div>
+                {selectedClass && (
+                    <button onClick={openAddNew} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"><FaPlus /> បន្ថែមថ្មី</button>
+                )}
             </div>
 
             {selectedClass && (
@@ -131,15 +184,18 @@ const Timetable = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {timeSlots.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="py-16 text-center text-gray-400">គ្មានទិន្នន័យ</td>
-                                </tr>
-                            ) : timeSlots.map(slot => {
+                            {timeSlots.map(slot => {
                                 const [start, end] = slot.split('-');
                                 return (
                                     <tr key={slot}>
-                                        <td className="py-2 px-4 border-b font-medium text-sm text-gray-600">{start} - {end}</td>
+                                        <td className="py-2 px-4 border-b font-medium text-sm text-gray-600">
+                                            <div className="flex items-center justify-between">
+                                                <span>{start} - {end}</span>
+                                                {grid[slot] && Object.keys(grid[slot]).length > 0 && (
+                                                    <button onClick={() => handleDeleteSlot(slot)} className="text-red-400 hover:text-red-600 ml-2" title="លុបជួរដេកនេះ"><FaTrash size={10} /></button>
+                                                )}
+                                            </div>
+                                        </td>
                                         {[0, 1, 2, 3, 4, 5].map(day => {
                                             const entry = grid[slot]?.[day];
                                             return (
@@ -177,8 +233,21 @@ const Timetable = () => {
                             <h2 className="text-lg font-bold">{editEntry ? 'កែសម្រួលកាលវិភាគ' : 'បន្ថែមកាលវិភាគ'}</h2>
                             <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600"><FaTimes /></button>
                         </div>
-                        <p className="text-sm text-gray-500 mb-4">ថ្ងៃ: {DAYS[selectedDay]} | ម៉ោង: {form.startTime || '--'}</p>
+                        {selectedDay !== null ? (
+                            <p className="text-sm text-gray-500 mb-4">ថ្ងៃ: {DAYS[selectedDay]} | ម៉ោង: {form.startTime || '--'}</p>
+                        ) : (
+                            <p className="text-sm text-gray-500 mb-4">បន្ថែមកាលវិភាគថ្មី</p>
+                        )}
                         <form onSubmit={handleSubmit} className="space-y-3">
+                            {selectedDay === null && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">ថ្ងៃនៃសប្តាហ៍ *</label>
+                                    <select value={selectedDay ?? ''} onChange={e => setSelectedDay(e.target.value !== '' ? Number(e.target.value) : null)} className="w-full p-2 border rounded" required>
+                                        <option value="">-- ជ្រើសរើស --</option>
+                                        {DAYS.map((day, i) => <option key={i} value={i}>{day}</option>)}
+                                    </select>
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-sm font-medium mb-1">មុខវិជ្ជា *</label>
                                 <select value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} className="w-full p-2 border rounded" required>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../config/api';
 import { showSuccessToast, showErrorToast, showConfirmDialog } from '../utils/alert';
@@ -7,7 +7,7 @@ import GenericTable from './common/GenericTable';
 import GenericForm from './common/GenericForm';
 import { TableSkeleton } from './common/Skeleton';
 import Badge from './common/Badge';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaFileImport } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
 const Students = () => {
@@ -26,6 +26,37 @@ const Students = () => {
 
     const [selectedSchool, setSelectedSchool] = useState(schoolId || '');
     const [selectedClass, setSelectedClass] = useState(classId || '');
+
+    const fileInputRef = useRef(null);
+
+    const handleImport = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const XLSX = await import('xlsx');
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet);
+                const students = json.map(row => ({
+                    studentId: row.studentId || row['លេខសម្គាល់'],
+                    fullNameKh: row.fullNameKh || row['ឈ្មោះខ្មែរ'],
+                    fullNameEn: row.fullNameEn || row['ឈ្មោះឡាតាំង'] || '',
+                    gender: row.gender || row['ភេទ'] || 'ប្រុស',
+                    class: row.class || row['ថ្នាក់'],
+                    dob: row.dob || row['ថ្ងៃខែឆ្នាំកំណើត'] || '',
+                    phone: row.phone || row['លេខទូរស័ព្ទ'] || '',
+                })).filter(s => s.studentId && s.fullNameKh && s.class);
+                if (students.length === 0) { showErrorToast('No valid data'); return; }
+                const res = await api.post('/students/import', students);
+                showSuccessToast(res.data.message || 'Import complete');
+                fetchStudents();
+            } catch { showErrorToast('Import failed'); } finally { event.target.value = ''; }
+        };
+        reader.readAsArrayBuffer(file);
+    };
 
     const canModify = useMemo(() =>
         ['superadmin', 'school-admin', 'teacher', 'data-entry'].includes(user.role),
@@ -199,13 +230,14 @@ const Students = () => {
                             ))}
                         </select>
                     </div>
-                    <div className="flex items-end">
-                        <button
-                            onClick={fetchStudents}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                        >
-                            ស្វែងរក
-                        </button>
+                    <div className="flex items-end gap-2">
+                        <button onClick={fetchStudents} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">ស្វែងរក</button>
+                        {canModify && (
+                            <>
+                                <button onClick={() => fileInputRef.current.click()} className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 flex items-center gap-1"><FaFileImport size={14} /> នាំចូល</button>
+                                <input type="file" ref={fileInputRef} onChange={handleImport} className="hidden" accept=".xlsx,.xls" />
+                            </>
+                        )}
                     </div>
                 </div>
                 {!hasSearched ? (

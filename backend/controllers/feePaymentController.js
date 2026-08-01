@@ -26,12 +26,16 @@ export const getFeePayments = async (req, res) => {
 
 export const createFeePayment = async (req, res) => {
     try {
-        const school = req.user.role === 'superadmin' ? req.body.school : req.user.school;
+        const school = req.body.school || req.user.school;
+        if (!school) {
+            return res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ' });
+        }
         const payment = await FeePayment.create({ ...req.body, school, createdBy: req.user._id });
         const populated = await payment.populate(['student', 'feeType']);
         res.status(201).json(populated);
     } catch (error) {
-        res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ', errors: error.errors });
+        console.error('Create fee payment error:', error);
+        res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ' });
     }
 };
 
@@ -39,12 +43,22 @@ export const updateFeePayment = async (req, res) => {
     try {
         const payment = await FeePayment.findById(req.params.id);
         if (!payment) return res.status(404).json({ message: 'រកមិនឃើញទេ' });
-        Object.assign(payment, req.body);
+        const { student, feeType, amount, dueDate, paidDate, paidAmount, status, receiptNumber, note } = req.body;
+        if (student !== undefined) payment.student = student;
+        if (feeType !== undefined) payment.feeType = feeType;
+        if (amount !== undefined) payment.amount = amount;
+        if (dueDate !== undefined) payment.dueDate = dueDate;
+        if (paidDate !== undefined) payment.paidDate = paidDate;
+        if (paidAmount !== undefined) payment.paidAmount = paidAmount;
+        if (status !== undefined) payment.status = status;
+        if (receiptNumber !== undefined) payment.receiptNumber = receiptNumber;
+        if (note !== undefined) payment.note = note;
         const updated = await payment.save();
         const populated = await updated.populate(['student', 'feeType']);
         res.json(populated);
     } catch (error) {
-        res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ', errors: error.errors });
+        console.error('Update fee payment error:', error);
+        res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ' });
     }
 };
 

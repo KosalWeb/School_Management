@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaTachometerAlt, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaBook, FaUniversity, FaChartBar, FaTimes, FaCheckCircle, FaClipboardList, FaCalendarAlt, FaAward, FaPenAlt, FaChevronDown, FaChevronRight, FaCog, FaUserCheck, FaUsers, FaClock, FaMoneyBillWave } from 'react-icons/fa';
+import { FaTachometerAlt, FaChalkboardTeacher, FaUserGraduate, FaSchool, FaBook, FaUniversity, FaChartBar, FaTimes, FaCheckCircle, FaClipboardList, FaCalendarAlt, FaAward, FaPenAlt, FaChevronDown, FaChevronRight, FaCog, FaUserCheck, FaUsers, FaClock, FaMoneyBillWave, FaArrowUp, FaExclamationTriangle, FaCalendarCheck, FaFileSignature, FaEnvelope, FaIdCard, FaStar } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
 const SIDEBAR_NAV = {
@@ -38,6 +38,43 @@ const SIDEBAR_NAV = {
       { to: '/student-score', label: 'បញ្ចូលពិន្ទុ', icon: FaPenAlt, roles: ['superadmin', 'school-admin'] },
       { to: '/student-score-list', label: 'បញ្ជីពិន្ទុ', icon: FaClipboardList, roles: ['superadmin', 'school-admin'] },
       { to: '/honor-table', label: 'តារាងកិត្តិយស', icon: FaAward, roles: ['*'] },
+    ],
+  },
+  studentMgmt: {
+    label: 'គ្រប់គ្រងសិស្ស',
+    icon: FaUserGraduate,
+    items: [
+      { to: '/student-promotion', label: 'ដំឡើងថ្នាក់', icon: FaArrowUp, roles: ['superadmin', 'school-admin'] },
+      { to: '/student-id-card', label: 'ប័ណ្ណសម្គាល់', icon: FaIdCard, roles: ['*'] },
+    ],
+  },
+  discipline: {
+    label: 'វិន័យ',
+    icon: FaExclamationTriangle,
+    items: [
+      { to: '/discipline', label: 'កំណត់ត្រាវិន័យ', icon: FaClipboardList, roles: ['*'] },
+    ],
+  },
+  scheduling: {
+    label: 'កាលវិភាគ',
+    icon: FaCalendarCheck,
+    items: [
+      { to: '/exam-schedule', label: 'កាលវិភាគប្រឡង', icon: FaFileSignature, roles: ['superadmin', 'school-admin'] },
+      { to: '/event-calendar', label: 'ប្រតិទិនព្រឹត្តិការណ៍', icon: FaCalendarAlt, roles: ['*'] },
+    ],
+  },
+  evaluation: {
+    label: 'វាយតម្លៃ',
+    icon: FaStar,
+    items: [
+      { to: '/teacher-evaluation', label: 'វាយតម្លៃគ្រូ', icon: FaStar, roles: ['superadmin', 'school-admin'] },
+    ],
+  },
+  communication: {
+    label: 'ទំនាក់ទំនង',
+    icon: FaEnvelope,
+    items: [
+      { to: '/notifications', label: 'ការជូនដំណឹង', icon: FaEnvelope, roles: ['*'] },
     ],
   },
   finance: {

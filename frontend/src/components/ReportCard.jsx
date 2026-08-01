@@ -8,6 +8,8 @@ const ATTENDANCE_LABELS = { present: 'វត្តមាន', absent: 'អវត
 
 const ReportCard = () => {
     const { user } = useAuth();
+    const [schools, setSchools] = useState([]);
+    const [selectedSchool, setSelectedSchool] = useState('');
     const [classes, setClasses] = useState([]);
     const [students, setStudents] = useState([]);
     const [selectedClass, setSelectedClass] = useState('');
@@ -18,8 +20,21 @@ const ReportCard = () => {
     const printRef = useRef();
 
     useEffect(() => {
-        api.get('/classes').then(({ data }) => setClasses(data)).catch(() => {});
-    }, []);
+        if (user?.role === 'superadmin') {
+            api.get('/schools').then(({ data }) => setSchools(data)).catch(() => {});
+        }
+    }, [user]);
+
+    const schoolId = user?.role === 'superadmin' ? selectedSchool : user?.school;
+
+    useEffect(() => {
+        setSelectedClass('');
+        if (schoolId) {
+            api.get(`/classes?school=${schoolId}`).then(({ data }) => setClasses(data)).catch(() => setClasses([]));
+        } else {
+            setClasses([]);
+        }
+    }, [schoolId]);
 
     useEffect(() => {
         if (selectedClass) {
@@ -101,9 +116,18 @@ const ReportCard = () => {
 
             <div className="bg-white p-4 rounded-lg shadow-md mb-6 no-print">
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    {user?.role === 'superadmin' && (
+                        <div>
+                            <label className="block text-sm font-medium mb-1">សាលារៀន</label>
+                            <select value={selectedSchool} onChange={e => { setSelectedSchool(e.target.value); setSelectedClass(''); setSelectedStudent(''); setData(null); }} className="w-full p-2 border rounded">
+                                <option value="">-- ជ្រើសរើស --</option>
+                                {schools.map(s => <option key={s._id} value={s._id}>{s.schoolName}</option>)}
+                            </select>
+                        </div>
+                    )}
                     <div>
                         <label className="block text-sm font-medium mb-1">ថ្នាក់</label>
-                        <select value={selectedClass} onChange={e => { setSelectedClass(e.target.value); setSelectedStudent(''); setData(null); }} className="w-full p-2 border rounded">
+                        <select value={selectedClass} onChange={e => { setSelectedClass(e.target.value); setSelectedStudent(''); setData(null); }} className="w-full p-2 border rounded" disabled={!schoolId}>
                             <option value="">-- ជ្រើសរើស --</option>
                             {classes.map(c => <option key={c._id} value={c._id}>{c.className}</option>)}
                         </select>

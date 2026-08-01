@@ -25,6 +25,13 @@ import StudentScorePage from './pages/StudentScorePage';
 import StudentScoreListPage from './pages/StudentScoreListPage';
 import HonorTablePage from './pages/HonorTablePage';
 import ReportCardPage from './pages/ReportCardPage';
+import StudentPromotionPage from './pages/StudentPromotionPage';
+import DisciplineRecordsPage from './pages/DisciplineRecordsPage';
+import EventCalendarPage from './pages/EventCalendarPage';
+import ExamSchedulePage from './pages/ExamSchedulePage';
+import NotificationsPage from './pages/NotificationsPage';
+import StudentIDCardPage from './pages/StudentIDCardPage';
+import TeacherEvaluationPage from './pages/TeacherEvaluationPage';
 import TimetablePage from './pages/TimetablePage';
 import FeeTypesPage from './pages/FeeTypesPage';
 import FeePaymentsPage from './pages/FeePaymentsPage';
@@ -47,6 +54,13 @@ function App() {
           <Route path="timetable" element={<TimetablePage />} />
           <Route path="fee-payments" element={<FeePaymentsPage />} />
           <Route path="report-card" element={<ReportCardPage />} />
+          <Route path="student-promotion" element={<StudentPromotionPage />} />
+          <Route path="discipline" element={<DisciplineRecordsPage />} />
+          <Route path="event-calendar" element={<EventCalendarPage />} />
+          <Route path="exam-schedule" element={<ExamSchedulePage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="student-id-card" element={<StudentIDCardPage />} />
+          <Route path="teacher-evaluation" element={<TeacherEvaluationPage />} />
 
           {/* --- Admin-Only Routes --- */}
           <Route element={<ProtectedRoute allowedRoles={['superadmin', 'school-admin']} />}>

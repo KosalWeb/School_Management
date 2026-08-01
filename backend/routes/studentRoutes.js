@@ -5,12 +5,16 @@ import {
     createStudent,
     updateStudent,
     deleteStudent,
+    importStudents,
+    promoteStudents,
 } from '../controllers/studentController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
-// --- UPDATED: 'teacher' role added, 'admin' corrected to 'school-admin' ---
 const canView = authorize('superadmin', 'school-admin', 'teacher', 'data-entry');
 const canModify = authorize('superadmin', 'school-admin', 'teacher', 'data-entry');
+
+router.post('/import', protect, canModify, importStudents);
+router.post('/promote', protect, authorize('superadmin', 'school-admin'), promoteStudents);
 
 router.route('/')
     .get(protect, canView, getStudents)

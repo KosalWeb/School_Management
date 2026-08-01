@@ -62,19 +62,21 @@ export const importSubjects = async (req, res) => {
     });
 };
 
-// Update a single subject (no change)
 export const updateSubject = async (req, res) => {
     try {
         const subject = await Subject.findById(req.params.id);
         if (subject) {
-            Object.assign(subject, req.body);
+            const { subjectCode, subjectName } = req.body;
+            if (subjectCode !== undefined) subject.subjectCode = subjectCode;
+            if (subjectName !== undefined) subject.subjectName = subjectName;
             const updatedSubject = await subject.save();
             res.json(updatedSubject);
         } else {
             res.status(404).json({ message: 'រកមិនឃើញមុខវិជ្ជាទេ' });
         }
     } catch (error) {
-        res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ', errors: error.errors });
+        console.error('Update subject error:', error);
+        res.status(400).json({ message: 'ទិន្នន័យ​មិន​ត្រឹមត្រូវ' });
     }
 };
 

@@ -80,7 +80,20 @@ export const updateStudent = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to modify students in this school.');
     }
 
-    Object.assign(student, req.body);
+    const { studentId, fullNameKh, fullNameEn, gender, dob, fatherName, motherName, phone, address, enrollmentDate, profileImage, status, class: classId } = req.body;
+    if (studentId !== undefined) student.studentId = studentId;
+    if (fullNameKh !== undefined) student.fullNameKh = fullNameKh;
+    if (fullNameEn !== undefined) student.fullNameEn = fullNameEn;
+    if (gender !== undefined) student.gender = gender;
+    if (dob !== undefined) student.dob = dob;
+    if (fatherName !== undefined) student.fatherName = fatherName;
+    if (motherName !== undefined) student.motherName = motherName;
+    if (phone !== undefined) student.phone = phone;
+    if (address !== undefined) student.address = address;
+    if (enrollmentDate !== undefined) student.enrollmentDate = enrollmentDate;
+    if (profileImage !== undefined) student.profileImage = profileImage;
+    if (status !== undefined) student.status = status;
+    if (classId !== undefined) student.class = classId;
     const updatedStudent = await student.save();
     res.json(updatedStudent);
 });
@@ -106,4 +119,48 @@ export const deleteStudent = asyncHandler(async (req, res) => {
 
     await student.deleteOne();
     res.json({ message: 'Student removed successfully' });
+});
+
+export const importStudents = asyncHandler(async (req, res) => {
+    const students = req.body;
+    let inserted = 0, errors = [];
+    if (!Array.isArray(students) || students.length === 0) {
+        return res.status(400).json({ message: 'No students provided.' });
+    }
+    for (const s of students) {
+        try {
+            if (s.studentId && s.fullNameKh && s.class) {
+                const exists = await Student.findOne({ studentId: s.studentId });
+                if (!exists) {
+                    await Student.create({ ...s, createdBy: req.user._id });
+                    inserted++;
+                }
+            }
+        } catch (e) {
+            errors.push({ studentId: s.studentId, error: e.message });
+        }
+    }
+    res.json({ message: `Imported ${inserted} students.`, errors });
+});
+
+export const promoteStudents = asyncHandler(async (req, res) => {
+    const { studentIds, targetClassId } = req.body;
+    if (!studentIds?.length || !targetClassId) {
+        res.status(400);
+        throw new Error('studentIds and targetClassId are required');
+    }
+    const targetClass = await Class.findById(targetClassId);
+    if (!targetClass) {
+        res.status(404);
+        throw new Error('Target class not found');
+    }
+    if (req.user.role !== 'superadmin' && targetClass.school.toString() !== req.user.school?.toString()) {
+        res.status(403);
+        throw new Error('Not authorized');
+    }
+    await Student.updateMany(
+        { _id: { $in: studentIds } },
+        { $set: { class: targetClassId } }
+    );
+    res.json({ message: `Promoted ${studentIds.length} students to ${targetClass.className}` });
 });

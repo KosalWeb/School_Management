@@ -98,12 +98,20 @@ export const updateTeacher = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to modify teachers in this school.');
     }
 
-    // Prevent email from being updated if it's in the request body
-    if (req.body.email) {
-        delete req.body.email;
-    }
-
-    Object.assign(teacher, req.body);
+    const { teacherId, fullNameKh, fullNameEn, gender, dob, phone, hireDate, address, profileImage, status, position, framework, organization } = req.body;
+    if (teacherId !== undefined) teacher.teacherId = teacherId;
+    if (fullNameKh !== undefined) teacher.fullNameKh = fullNameKh;
+    if (fullNameEn !== undefined) teacher.fullNameEn = fullNameEn;
+    if (gender !== undefined) teacher.gender = gender;
+    if (dob !== undefined) teacher.dob = dob;
+    if (phone !== undefined) teacher.phone = phone;
+    if (hireDate !== undefined) teacher.hireDate = hireDate;
+    if (address !== undefined) teacher.address = address;
+    if (profileImage !== undefined) teacher.profileImage = profileImage;
+    if (status !== undefined) teacher.status = status;
+    if (position !== undefined) teacher.position = position;
+    if (framework !== undefined) teacher.framework = framework;
+    if (organization !== undefined) teacher.organization = organization;
     const updatedTeacher = await teacher.save();
     res.json(updatedTeacher);
 });

@@ -87,14 +87,19 @@ export const updateSchool = async (req, res) => {
     try {
         const school = await School.findById(req.params.id);
         if (school) {
-            Object.assign(school, req.body);
+            const { schoolCode, schoolName, schoolLevel, address } = req.body;
+            if (schoolCode !== undefined) school.schoolCode = schoolCode;
+            if (schoolName !== undefined) school.schoolName = schoolName;
+            if (schoolLevel !== undefined) school.schoolLevel = schoolLevel;
+            if (address !== undefined) school.address = address;
             const updatedSchool = await school.save();
             res.json(updatedSchool);
         } else {
             res.status(404).json({ message: 'School not found.' });
         }
     } catch (error) {
-        res.status(400).json({ message: 'Invalid data.', errors: error.errors });
+        console.error('Update school error:', error);
+        res.status(400).json({ message: 'Invalid data.' });
     }
 };
 
