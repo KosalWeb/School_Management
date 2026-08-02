@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaSchool, FaChalkboardTeacher, FaUserGraduate, FaUniversity, FaBook, FaChartBar, FaCheckCircle, FaClipboardList, FaCalendarAlt, FaAward, FaPenAlt, FaCog, FaUsers } from 'react-icons/fa';
+import { FaSearch, FaSchool, FaChalkboardTeacher, FaUserGraduate, FaUniversity, FaBook, FaChartBar, FaCheckCircle, FaClipboardList, FaCalendarAlt, FaAward, FaPenAlt, FaCog, FaUsers, FaPrint } from 'react-icons/fa';
 
 const ROUTES = [
     { path: '/', label: 'ផ្ទាំងគ្រប់គ្រង', icon: FaSchool },
@@ -15,6 +15,7 @@ const ROUTES = [
     { path: '/student-score-list', label: 'បញ្ជីពិន្ទុ', icon: FaClipboardList },
     { path: '/honor-table', label: 'តារាងកិត្តិយស', icon: FaAward },
     { path: '/reports', label: 'របាយការណ៍', icon: FaChartBar },
+    { path: '/monthly-result', label: 'របាយការណ៍លទ្ធផលប្រចាំខែ', icon: FaPrint },
     { path: '/teacher-attendance-report', label: 'របាយការណ៍វត្តមានគ្រូ', icon: FaCalendarAlt },
     { path: '/student-attendance-report', label: 'របាយការណ៍វត្តមានសិស្ស', icon: FaClipboardList },
     { path: '/users', label: 'អ្នកប្រើប្រាស់', icon: FaUsers },

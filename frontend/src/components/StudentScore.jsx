@@ -186,7 +186,7 @@ const StudentScore = () => {
                                 <tr>
                                     <th className="px-4 py-3 text-left font-medium text-gray-600">លេខរៀង</th>
                                     <th className="px-4 py-3 text-left font-medium text-gray-600">គោត្តនាម និងនាម</th>
-                                    <th className="px-4 py-3 text-left font-medium text-gray-600">លេខសម្គាល់</th>
+                                    <th className="px-4 py-3 text-center font-medium text-gray-600">ភេទ</th>
                                     <th className="px-4 py-3 text-center font-medium text-gray-600">ពិន្ទុ (0-100)</th>
                                 </tr>
                             </thead>
@@ -195,7 +195,7 @@ const StudentScore = () => {
                                     <tr key={student._id} className="hover:bg-gray-50">
                                         <td className="px-4 py-3">{i + 1}</td>
                                         <td className="px-4 py-3 font-medium">{student.fullNameKh}</td>
-                                        <td className="px-4 py-3 text-gray-500">{student.studentId}</td>
+                                        <td className="px-4 py-3 text-center">{student.gender}</td>
                                         <td className="px-4 py-3 text-center">
                                             <input
                                                 type="number"

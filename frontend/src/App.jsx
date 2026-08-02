@@ -22,7 +22,6 @@ import ReportPage from './pages/ReportPage';
 import TeacherAttendanceReportPage from './pages/TeacherAttendanceReportPage';
 import StudentAttendanceReportPage from './pages/StudentAttendanceReportPage';
 import StudentScorePage from './pages/StudentScorePage';
-import StudentScoreListPage from './pages/StudentScoreListPage';
 import HonorTablePage from './pages/HonorTablePage';
 import ReportCardPage from './pages/ReportCardPage';
 import StudentPromotionPage from './pages/StudentPromotionPage';
@@ -73,7 +72,8 @@ function App() {
             <Route path="teacher-attendance-report" element={<TeacherAttendanceReportPage />} />
             <Route path="student-attendance-report" element={<StudentAttendanceReportPage />} />
             <Route path="student-score" element={<StudentScorePage />} />
-            <Route path="student-score-list" element={<StudentScoreListPage />} />
+            <Route path="student-score-list" element={<StudentScorePage />} />
+            <Route path="monthly-result" element={<StudentScorePage />} />
             <Route path="fee-types" element={<FeeTypesPage />} />
           </Route>
 
