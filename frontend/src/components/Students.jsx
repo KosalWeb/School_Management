@@ -173,6 +173,7 @@ const Students = () => {
         },
         { key: 'studentId', label: 'លេខសម្គាល់សិស្ស' },
         { key: 'fullNameKh', label: 'ឈ្មោះពេញ (ខ្មែរ)' },
+        { key: 'fullNameEn', label: 'ឈ្មោះពេញ (ឡាតាំង)*', render: (item) => item.fullNameEn || '--' },
         { key: 'gender', label: 'ភេទ', render: (item) => <Badge value={item.gender === 'ប្រុស' ? 'ប្រុស' : 'ស្រី'} color={item.gender === 'ប្រុស' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800'} /> },
         { key: 'dob', label: 'ថ្ងៃខែឆ្នាំកំណើត', render: (item) => formatDateDisplay(item.dob) },
         { key: 'class.className', label: 'ថ្នាក់រៀន' },

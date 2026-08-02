@@ -16,11 +16,27 @@ const StatCard = ({ title, value, icon, color, subtitle }) => (
     </div>
 );
 
-const AttendanceChart = ({ data }) => {
+const AttendanceChart = ({ data, range, onRangeChange }) => {
     if (!data || data.length === 0) return null;
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">វត្តមានប្រចាំថ្ងៃ (៧ ថ្ងៃចុងក្រោយ)</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <h2 className="text-lg font-bold text-gray-800">វត្តមានប្រចាំថ្ងៃ</h2>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => onRangeChange('7d')}
+                        className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${range === '7d' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    >
+                        ៧ ថ្ងៃ
+                    </button>
+                    <button
+                        onClick={() => onRangeChange('1m')}
+                        className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${range === '1m' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    >
+                        ១ ខែ
+                    </button>
+                </div>
+            </div>
             <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={data}>
                     <XAxis dataKey="date" tick={{ fontSize: 12 }} />
@@ -44,6 +60,7 @@ const DashboardPage = () => {
     const [chartData, setChartData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+    const [attendanceRange, setAttendanceRange] = useState('7d');
 
     useEffect(() => {
         fetchStats();
@@ -69,12 +86,16 @@ const DashboardPage = () => {
         try {
             setLoading(true);
             const today = new Date();
-            const sevenDaysAgo = new Date(today);
-            sevenDaysAgo.setDate(today.getDate() - 6);
+            const startDate = new Date(today);
+            if (attendanceRange === '1m') {
+                startDate.setMonth(today.getMonth() - 1);
+            } else {
+                startDate.setDate(today.getDate() - 6);
+            }
 
             const [statsRes, chartRes] = await Promise.all([
                 api.get('/dashboard'),
-                api.get(`/attendance/stats?from=${fmt(sevenDaysAgo)}&to=${fmt(today)}`).catch(() => null),
+                api.get(`/attendance/stats?from=${fmt(startDate)}&to=${fmt(today)}`).catch(() => null),
             ]);
             setStats(statsRes.data);
 
@@ -89,6 +110,10 @@ const DashboardPage = () => {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchStats();
+    }, [attendanceRange]);
 
     const renderSkeleton = () => {
         const count = user?.role === 'superadmin' ? 4 : user?.role === 'school-admin' ? 3 : 2;
@@ -164,7 +189,7 @@ const DashboardPage = () => {
                     )}
                 </div>
 
-                {chartData && <AttendanceChart data={chartData} />}
+                {chartData && <AttendanceChart data={chartData} range={attendanceRange} onRangeChange={setAttendanceRange} />}
             </div>
         );
     };
