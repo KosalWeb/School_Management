@@ -7,6 +7,17 @@ import Student from '../models/StudentModel.js';
 import Attendance from '../models/AttendanceModel.js';
 import StudentAttendance from '../models/StudentAttendanceModel.js';
 import ListItem from '../models/ListItemModel.js';
+import Discipline from '../models/DisciplineModel.js';
+import Event from '../models/EventModel.js';
+import ExamSchedule from '../models/ExamScheduleModel.js';
+import FeeType from '../models/FeeTypeModel.js';
+import FeePayment from '../models/FeePaymentModel.js';
+import Notification from '../models/NotificationModel.js';
+import StudentScore from '../models/StudentScoreModel.js';
+import TeacherEvaluation from '../models/TeacherEvaluationModel.js';
+import Timetable from '../models/TimetableModel.js';
+
+const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 export const seedData = async () => {
     // Drop stale indexes that conflict with current schemas
@@ -24,6 +35,15 @@ export const seedData = async () => {
         Attendance.deleteMany(),
         StudentAttendance.deleteMany(),
         ListItem.deleteMany(),
+        Discipline.deleteMany(),
+        Event.deleteMany(),
+        ExamSchedule.deleteMany(),
+        FeeType.deleteMany(),
+        FeePayment.deleteMany(),
+        Notification.deleteMany(),
+        StudentScore.deleteMany(),
+        TeacherEvaluation.deleteMany(),
+        Timetable.deleteMany(),
     ]);
 
     // 1. Find or Create Super Admin
@@ -260,6 +280,9 @@ export const seedData = async () => {
                     fullNameEn: name.en,
                     gender,
                     dob: new Date(birthYear, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+                    profileImage: Math.random() < 0.9
+                        ? `https://randomuser.me/api/portraits/${gender === 'ស្រី' ? 'women' : 'men'}/${(parseInt(sid) * 13) % 100}.jpg`
+                        : 'no-photo.jpg',
                     fatherName: `ឪពុក ${fatherNames[Math.floor(Math.random() * fatherNames.length)]}`,
                     motherName: `ម្តាយ ${motherNames[Math.floor(Math.random() * motherNames.length)]}`,
                     phone: `0${15 + Math.floor(Math.random() * 10)}${sid}`,
@@ -311,6 +334,304 @@ export const seedData = async () => {
     }
     const createdAttendance = await Attendance.insertMany(attendanceRecords);
 
+    // Group students & classes by school for per-school generation
+    const studentBySchool = {};
+    const classBySchool = {};
+    for (const cls of createdClasses) {
+        const schoolId = cls.school.toString();
+        if (!classBySchool[schoolId]) classBySchool[schoolId] = [];
+        classBySchool[schoolId].push(cls);
+    }
+    for (const s of createdStudents) {
+        const schoolId = createdClasses.find(c => c._id.equals(s.class))?.school?.toString();
+        if (!schoolId) continue;
+        if (!studentBySchool[schoolId]) studentBySchool[schoolId] = [];
+        studentBySchool[schoolId].push(s);
+    }
+
+    // 10. Student Attendance for the past 5 school days (drives report cards / reports)
+    const studentAttendanceRecords = [];
+    for (let dayOffset = 4; dayOffset >= 0; dayOffset--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - dayOffset);
+        if (date.getDay() === 0 || date.getDay() === 6) continue;
+
+        for (const student of createdStudents) {
+            const schoolId = createdClasses.find(c => c._id.equals(student.class))?.school;
+            if (!schoolId) continue;
+            const attStatuses = ['present', 'present', 'present', 'present', 'present', 'absent', 'late', 'leave'];
+            const status = attStatuses[Math.floor(Math.random() * attStatuses.length)];
+            studentAttendanceRecords.push({
+                student: student._id,
+                school: schoolId,
+                date,
+                status,
+                checkIn: status === 'absent' ? '' : `7:${Math.random() > 0.5 ? '00' : '30'}`,
+                checkOut: status === 'absent' ? '' : `1${Math.floor(Math.random() * 3)}:00`,
+                note: status === 'present' ? '' : status === 'absent' ? 'អវត្តមាន' : status === 'late' ? 'យឺត' : 'សុំច្បាប់',
+                markedBy: superAdmin._id,
+            });
+        }
+    }
+    const createdStudentAttendance = await StudentAttendance.insertMany(studentAttendanceRecords);
+
+    // 11. Student Scores (12 months + 2 semesters x all subjects) — drives Honor Table, Score List, Report Card
+    const scoreMonths = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
+    const scoreSemesters = ['ឆមាសទី១', 'ឆមាសទី២'];
+    const scoreExamTypes = [...scoreMonths, ...scoreSemesters];
+    const scoreRecords = [];
+    createdStudents.forEach((student, idx) => {
+        const ability = 45 + Math.floor(Math.random() * 45);
+        const schoolId = createdClasses.find(c => c._id.equals(student.class))?.school;
+        for (const subject of subjects) {
+            scoreExamTypes.forEach((examType, ei) => {
+                const score = Math.max(20, Math.min(100, ability + randInt(-12, 12)));
+                const isMonth = ei < scoreMonths.length;
+                const date = isMonth
+                    ? new Date(today.getFullYear(), ei, randInt(1, 25))
+                    : new Date(today.getFullYear(), today.getMonth() - (examType === 'ឆមាសទី១' ? 3 : 0), randInt(1, 25));
+                scoreRecords.push({
+                    student: student._id,
+                    subject: subject._id,
+                    class: student.class,
+                    school: schoolId,
+                    score,
+                    examType,
+                    date,
+                    markedBy: superAdmin._id,
+                });
+            });
+        }
+    });
+    const createdScores = await StudentScore.insertMany(scoreRecords);
+
+    // 12. Fee Types per school (drives Fee Types page)
+    const feeTypeData = [
+        { name: 'ថ្លៃសិក្សា', amount: 500000 },
+        { name: 'ថ្លៃសម្ភារៈសិក្សា', amount: 50000 },
+        { name: 'ថ្លៃប្រឡង', amount: 20000 },
+        { name: 'ថ្លៃវិញ្ញាបនបត្រ', amount: 15000 },
+    ];
+    const feeTypes = [];
+    for (const school of schools) {
+        for (const ft of feeTypeData) {
+            feeTypes.push({ ...ft, school: school._id, createdBy: superAdmin._id });
+        }
+    }
+    const createdFeeTypes = await FeeType.insertMany(feeTypes);
+
+    // 13. Fee Payments (drives Fee Payments page)
+    const feePaymentRecords = [];
+    let receiptCounter = 1;
+    for (const school of schools) {
+        const schoolFeeTypes = createdFeeTypes.filter(ft => ft.school.equals(school._id));
+        const schoolStudents = studentBySchool[school._id.toString()] || [];
+        for (const student of schoolStudents) {
+            for (const feeType of schoolFeeTypes) {
+                const roll = Math.random();
+                const dueDate = new Date(today.getFullYear(), today.getMonth() - randInt(0, 2), randInt(1, 28));
+                let status = 'unpaid';
+                let paidDate = null;
+                let paidAmount = 0;
+                let receiptNumber = '';
+                if (roll < 0.6) {
+                    status = 'paid';
+                    paidDate = new Date(dueDate);
+                    paidDate.setDate(paidDate.getDate() + randInt(0, 10));
+                    paidAmount = feeType.amount;
+                    receiptNumber = `RCP-${String(receiptCounter++).padStart(6, '0')}`;
+                } else if (roll < 0.75) {
+                    status = 'partial';
+                    paidDate = new Date(dueDate);
+                    paidDate.setDate(paidDate.getDate() + randInt(0, 5));
+                    paidAmount = Math.round(feeType.amount / 2);
+                    receiptNumber = `RCP-${String(receiptCounter++).padStart(6, '0')}`;
+                } else if (roll < 0.85) {
+                    status = 'overdue';
+                }
+                feePaymentRecords.push({
+                    student: student._id,
+                    feeType: feeType._id,
+                    school: school._id,
+                    amount: feeType.amount,
+                    dueDate,
+                    paidDate,
+                    paidAmount,
+                    status,
+                    receiptNumber,
+                    createdBy: superAdmin._id,
+                });
+            }
+        }
+    }
+    const createdFeePayments = await FeePayment.insertMany(feePaymentRecords);
+
+    // 14. Timetable (drives Timetable page)
+    const timetableRecords = [];
+    const teachersBySchool = {};
+    for (const t of teachers) {
+        const schoolId = t.organization.toString();
+        if (!teachersBySchool[schoolId]) teachersBySchool[schoolId] = [];
+        teachersBySchool[schoolId].push(t);
+    }
+    const periods = [
+        { startTime: '7:30', endTime: '9:00' },
+        { startTime: '9:10', endTime: '10:40' },
+        { startTime: '14:00', endTime: '15:30' },
+    ];
+    for (const cls of createdClasses) {
+        const schoolId = cls.school.toString();
+        const schoolTeachers = teachersBySchool[schoolId] || [];
+        for (let day = 0; day <= 4; day++) {
+            periods.forEach((period, pIdx) => {
+                const subject = subjects[(pIdx + day) % subjects.length];
+                const teacher = schoolTeachers[(pIdx + day) % schoolTeachers.length];
+                timetableRecords.push({
+                    school: cls.school,
+                    class: cls._id,
+                    subject: subject._id,
+                    teacher: teacher ? teacher._id : null,
+                    dayOfWeek: day,
+                    startTime: period.startTime,
+                    endTime: period.endTime,
+                    room: cls.roomNumber,
+                    createdBy: superAdmin._id,
+                });
+            });
+        }
+    }
+    const createdTimetable = await Timetable.insertMany(timetableRecords);
+
+    // 15. Exam Schedules (drives Exam Schedule page)
+    const examScheduleRecords = [];
+    const examSubjects = subjects.slice(0, 6);
+    for (const cls of createdClasses) {
+        const start = new Date(today);
+        start.setDate(start.getDate() + randInt(10, 30));
+        examSubjects.forEach((subject, idx) => {
+            const examDate = new Date(start);
+            examDate.setDate(examDate.getDate() + idx);
+            examScheduleRecords.push({
+                name: `ប្រឡង${subject.subjectName}`,
+                class: cls._id,
+                subject: subject._id,
+                school: cls.school,
+                date: examDate,
+                startTime: '7:30',
+                endTime: '9:30',
+                room: cls.roomNumber,
+                examType: 'ឆមាសទី២',
+                createdBy: superAdmin._id,
+            });
+        });
+    }
+    const createdExamSchedules = await ExamSchedule.insertMany(examScheduleRecords);
+
+    // 16. Events (drives Event Calendar page)
+    const eventData = [
+        { title: 'ពិធីបុណ្យអុំទូក', type: 'holiday', description: 'បិទវិស្សមកាលបុណ្យជាតិ' },
+        { title: 'កិច្ចប្រជុំគ្រូបង្រៀន', type: 'meeting', description: 'កិច្ចប្រជុំគ្រូបង្រៀនប្រចាំខែ' },
+        { title: 'ព្រឹត្តិការណ៍កីឡា', type: 'sport', description: 'ប្រកួតកីឡាប្រចាំសាលា' },
+        { title: 'ប្រឡងឆមាស', type: 'exam', description: 'ប្រឡងបញ្ចប់ឆមាស' },
+    ];
+    const eventRecords = [];
+    schools.forEach((school, si) => {
+        eventData.forEach((ev, ei) => {
+            const evDate = new Date(today);
+            evDate.setDate(evDate.getDate() + ei * 15 + si * 3);
+            eventRecords.push({ ...ev, date: evDate, school: school._id, createdBy: superAdmin._id });
+        });
+    });
+    eventRecords.push(
+        { title: 'បុណ្យចូលឆ្នាំថ្មី', type: 'holiday', date: new Date(today.getFullYear(), 3, 14), allSchool: true, description: 'បុណ្យចូលឆ្នាំប្រពៃណីខ្មែរ', createdBy: superAdmin._id },
+        { title: 'ទិវាជាតិ', type: 'holiday', date: new Date(today.getFullYear(), 8, 24), allSchool: true, description: 'ទិវារំដោះជាតិ', createdBy: superAdmin._id },
+        { title: 'ទិវាគ្រូបង្រៀន', type: 'other', date: new Date(today.getFullYear(), 9, 5), allSchool: true, description: 'ទិវាគ្រូបង្រៀនជាតិ', createdBy: superAdmin._id },
+    );
+    const createdEvents = await Event.insertMany(eventRecords);
+
+    // 17. Teacher Evaluations (drives Teacher Evaluation page)
+    const evaluationRecords = [];
+    for (const teacher of teachers) {
+        for (let i = 0; i < 2; i++) {
+            evaluationRecords.push({
+                teacher: teacher._id,
+                school: teacher.organization,
+                evaluator: superAdmin._id,
+                date: new Date(today.getFullYear(), today.getMonth() - i, randInt(1, 28)),
+                criteria: {
+                    teaching: randInt(6, 10),
+                    discipline: randInt(6, 10),
+                    punctuality: randInt(6, 10),
+                    preparation: randInt(6, 10),
+                    communication: randInt(6, 10),
+                },
+                comments: i === 0 ? 'គ្រូបង្រៀនពូកែ' : '',
+                status: i === 0 ? 'submitted' : 'draft',
+            });
+        }
+    }
+    const createdEvaluations = await TeacherEvaluation.insertMany(evaluationRecords);
+
+    // 18. Discipline Records (drives Discipline Records page)
+    const disciplineData = [
+        { type: 'behavior', description: 'ប្រព្រឹត្តិអំពើមិនសមរម្យក្នុងថ្នាក់', action: 'ព្រមានដោយផ្ទាល់មាត់' },
+        { type: 'absent', description: 'អវត្តមានមិនបានសុំច្បាប់', action: 'ហៅឪពុកម្តាយមកជួប' },
+        { type: 'cheating', description: 'ចម្លងក្នុងពេលប្រឡង', action: 'ចាប់ពិន្ទុ ០ នឹងព្រមាន' },
+        { type: 'damage', description: 'បំផ្លាញសម្ភារៈសាលា', action: 'សងលុយការខូចខាត' },
+        { type: 'other', description: 'រំខានដល់ការសិក្សារបស់គ្នាលីគ្នា', action: 'ណែនាំកែតម្រូវ' },
+    ];
+    const disciplineRecords = [];
+    const disciplineStudents = createdStudents.filter((_, i) => i % 10 === 0).slice(0, 30);
+    for (const student of disciplineStudents) {
+        const schoolId = createdClasses.find(c => c._id.equals(student.class))?.school;
+        const d = disciplineData[randInt(0, disciplineData.length - 1)];
+        disciplineRecords.push({
+            student: student._id,
+            school: schoolId,
+            date: new Date(today.getFullYear(), today.getMonth(), randInt(1, 28)),
+            type: d.type,
+            description: d.description,
+            action: d.action,
+            status: ['open', 'open', 'resolved', 'dismissed'][randInt(0, 3)],
+            createdBy: superAdmin._id,
+        });
+    }
+    const createdDiscipline = await Discipline.insertMany(disciplineRecords);
+
+    // 19. Notifications (drives Notifications page)
+    const notificationTypes = [
+        { type: 'fee', messages: ['សូមបង់ថ្លៃសិក្សា', 'ថ្លៃសិក្សាជំពាក់នៅសល់'] },
+        { type: 'attendance', messages: ['អវត្តមានពីសាលា', 'យឺតពេលចូលរៀន'] },
+        { type: 'exam', messages: ['ប្រឡងនៅសប្តាហ៍ក្រោយ', 'មានការប្រឡងបន្ថែម'] },
+        { type: 'discipline', messages: ['មានកំណត់ហេតុវិន័យ', 'អាកប្បកិរិយាប្រសើរ'] },
+        { type: 'general', messages: ['កម្មវិធីអប់រំថ្មី', 'ជូនដំណឹងអំពីសាលា'] },
+    ];
+    const notificationRecords = [];
+    const notifyStudents = createdStudents.filter((_, i) => i % 6 === 0).slice(0, 40);
+    for (const student of notifyStudents) {
+        const schoolId = createdClasses.find(c => c._id.equals(student.class))?.school;
+        const nt = notificationTypes[randInt(0, notificationTypes.length - 1)];
+        notificationRecords.push({
+            student: student._id,
+            school: schoolId,
+            type: nt.type,
+            message: nt.messages[randInt(0, nt.messages.length - 1)],
+            channel: ['sms', 'email', 'in-app'][randInt(0, 2)],
+            status: ['sent', 'sent', 'pending', 'failed'][randInt(0, 3)],
+            sentAt: new Date(today.getFullYear(), today.getMonth(), randInt(1, 28)),
+            createdBy: superAdmin._id,
+        });
+    }
+    const createdNotifications = await Notification.insertMany(notificationRecords);
+
+    // 20. Assign classes to teacher users (so teacher dashboards & timetables work)
+    for (const user of schoolUsers) {
+        if (user.role !== 'teacher') continue;
+        const schoolClasses = classBySchool[user.school.toString()] || [];
+        user.classes = schoolClasses.map(c => c._id);
+        await user.save();
+    }
+
     return {
         superAdmin: 1,
         schools: schools.length,
@@ -321,6 +642,16 @@ export const seedData = async () => {
         teachers: teachers.length,
         createdStudents: createdStudents.length,
         createdAttendance: createdAttendance.length,
+        createdStudentAttendance: createdStudentAttendance.length,
+        createdScores: createdScores.length,
+        createdFeeTypes: createdFeeTypes.length,
+        createdFeePayments: createdFeePayments.length,
+        createdTimetable: createdTimetable.length,
+        createdExamSchedules: createdExamSchedules.length,
+        createdEvents: createdEvents.length,
+        createdEvaluations: createdEvaluations.length,
+        createdDiscipline: createdDiscipline.length,
+        createdNotifications: createdNotifications.length,
         studentsPerSchool: Object.values(schoolClassMap).map(cls => cls.length),
     };
 };

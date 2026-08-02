@@ -387,7 +387,7 @@ const Teachers = () => {
                 ) : isLoading ? (
                     <TableSkeleton rows={5} columns={12} />
                 ) : (
-                    <GenericTable columns={columns} data={filteredTeachers} />
+                    <GenericTable columns={columns} data={filteredTeachers} fileName="Teachers" />
                 )}
             </div>
         </div>

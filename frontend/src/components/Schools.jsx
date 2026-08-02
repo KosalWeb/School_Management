@@ -169,7 +169,7 @@ const Schools = () => {
                         </select>
                     </div>
                 </div>
-                <GenericTable columns={columns} data={filteredSchools} />
+                <GenericTable columns={columns} data={filteredSchools} fileName="Schools" />
             </div>
         </div>
     );

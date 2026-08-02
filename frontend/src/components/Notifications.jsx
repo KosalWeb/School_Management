@@ -87,7 +87,7 @@ const Notifications = () => {
                     <div className="flex items-end"><button onClick={() => setShowModal(true)} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"><FaPlus /> ផ្ញើការជូនដំណឹង</button></div>
                 </div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-md"><GenericTable columns={columns} data={items} /></div>
+            <div className="bg-white p-4 rounded-lg shadow-md"><GenericTable columns={columns} data={items} fileName="Notifications" /></div>
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>

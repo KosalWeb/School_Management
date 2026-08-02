@@ -64,7 +64,7 @@ const TeacherEvaluation = () => {
             <div className="bg-white p-4 rounded-lg shadow-md mb-6">
                 <button onClick={openAdd} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"><FaPlus /> វាយតម្លៃថ្មី</button>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-md"><GenericTable columns={columns} data={items} /></div>
+            <div className="bg-white p-4 rounded-lg shadow-md"><GenericTable columns={columns} data={items} fileName="TeacherEvaluation" /></div>
 
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>

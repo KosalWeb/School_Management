@@ -17,7 +17,17 @@ const run = async () => {
         console.log(`   - ${result.subjects} Subjects`);
         console.log(`   - ${result.teachers} Teachers`);
         console.log(`   - ${result.createdStudents} Students (100 per school)`);
-        console.log(`   - ${result.createdAttendance} Attendance Records`);
+        console.log(`   - ${result.createdAttendance} Teacher Attendance Records`);
+        console.log(`   - ${result.createdStudentAttendance} Student Attendance Records`);
+        console.log(`   - ${result.createdScores} Student Scores`);
+        console.log(`   - ${result.createdFeeTypes} Fee Types`);
+        console.log(`   - ${result.createdFeePayments} Fee Payments`);
+        console.log(`   - ${result.createdTimetable} Timetable Entries`);
+        console.log(`   - ${result.createdExamSchedules} Exam Schedules`);
+        console.log(`   - ${result.createdEvents} Events`);
+        console.log(`   - ${result.createdEvaluations} Teacher Evaluations`);
+        console.log(`   - ${result.createdDiscipline} Discipline Records`);
+        console.log(`   - ${result.createdNotifications} Notifications`);
         process.exit();
     } catch (error) {
         console.error('Seed Error:', error);

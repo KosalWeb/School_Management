@@ -116,14 +116,23 @@ export const getHonorTable = asyncHandler(async (req, res) => {
 
     const results = await StudentScore.aggregate(pipeline);
 
-    const ranked = results.map((r, i) => ({
-        rank: i + 1,
-        studentId: r.student._id,
-        studentName: r.student.fullNameKh,
-        studentCode: r.student.studentId,
-        averageScore: Math.round(r.averageScore * 100) / 100,
-        totalSubjects: r.totalSubjects,
-    }));
+    let prevScore = null;
+    let prevRank = 0;
+    const ranked = results.map((r, i) => {
+        const averageScore = Math.round(r.averageScore * 100) / 100;
+        const rank = prevScore !== null && averageScore === prevScore ? prevRank : i + 1;
+        prevScore = averageScore;
+        prevRank = rank;
+        return {
+            rank,
+            studentId: r.student._id,
+            studentName: r.student.fullNameKh,
+            studentCode: r.student.studentId,
+            averageScore,
+            totalSubjects: r.totalSubjects,
+            profileImage: r.student.profileImage || '',
+        };
+    });
 
     res.json(ranked);
 });

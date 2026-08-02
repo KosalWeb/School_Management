@@ -189,7 +189,7 @@ const FeePayments = () => {
             </div>
 
             <div className="bg-white p-4 rounded-lg shadow-md">
-                <GenericTable columns={columns} data={payments} />
+                <GenericTable columns={columns} data={payments} fileName="FeePayments" />
             </div>
 
             {showModal && (

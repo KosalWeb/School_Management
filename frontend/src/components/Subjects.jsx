@@ -208,7 +208,7 @@ const Subjects = () => {
                     </div>
                 </div>
 
-                <GenericTable columns={columns} data={currentItems} />
+                <GenericTable columns={columns} data={currentItems} fileName="Subjects" showExport={false} />
 
                 {totalPages > 1 && (
                     <div className="flex justify-center items-center mt-4 space-x-2">

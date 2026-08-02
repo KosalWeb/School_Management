@@ -330,6 +330,8 @@ const Report = () => {
                     columns={summaryByLevelColumns}
                     data={filteredSummaryByLevel}
                     summary={grandTotalSummaryForLevelTable}
+                    fileName="School_Report_By_Level"
+                    showExport={false}
                 />
             </div>
 
@@ -339,6 +341,8 @@ const Report = () => {
                     columns={schoolReportColumns}
                     data={filteredSchoolData}
                     summary={summaryRowForFilteredSchools}
+                    fileName="School_Report_By_School"
+                    showExport={false}
                 />
             </div>
 
@@ -348,6 +352,8 @@ const Report = () => {
                     columns={classSummaryColumns}
                     data={filteredSummaryByClass}
                     summary={grandTotalSummaryForClassTable}
+                    fileName="School_Report_By_Class"
+                    showExport={false}
                 />
             </div>
         </div>

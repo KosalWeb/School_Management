@@ -39,6 +39,7 @@ const Timetable = () => {
         } else {
             setClasses([]); setSubjects([]); setTeachers([]);
         }
+        setIsLoading(false);
     }, [schoolId]);
 
     const fetchTimetable = useCallback(async () => {

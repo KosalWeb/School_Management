@@ -10,6 +10,11 @@ import Badge from './common/Badge';
 import { FaEdit, FaTrash, FaFileImport } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
+const studentAvatar = (name, image) =>
+    image && image !== 'no-photo.jpg'
+        ? image
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=128`;
+
 const Students = () => {
     const { user } = useAuth();
     const [students, setStudents] = useState([]);
@@ -134,6 +139,7 @@ const Students = () => {
     }, [selectedSchool, classes]);
 
     const formFields = useMemo(() => [
+        { name: 'profileImage', label: 'រូបភាព (URL)' },
         { name: 'studentId', label: 'លេខសម្គាល់សិស្ស', required: true },
         { name: 'fullNameKh', label: 'ឈ្មោះពេញ (ខ្មែរ)', required: true },
         { name: 'fullNameEn', label: 'ឈ្មោះពេញ (ឡាតាំង)', required: true },
@@ -155,6 +161,16 @@ const Students = () => {
 
     const columns = useMemo(() => [
         { key: 'index', label: 'ល.រ' },
+        {
+            key: 'profileImage', label: 'រូបភាព',
+            render: (item) => (
+                <img
+                    src={studentAvatar(item.fullNameKh, item.profileImage)}
+                    alt={item.fullNameKh}
+                    className="h-10 w-10 rounded-full object-cover"
+                />
+            )
+        },
         { key: 'studentId', label: 'លេខសម្គាល់សិស្ស' },
         { key: 'fullNameKh', label: 'ឈ្មោះពេញ (ខ្មែរ)' },
         { key: 'gender', label: 'ភេទ', render: (item) => <Badge value={item.gender === 'ប្រុស' ? 'ប្រុស' : 'ស្រី'} color={item.gender === 'ប្រុស' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800'} /> },
@@ -182,7 +198,7 @@ const Students = () => {
         navigate(newSchoolId ? `/students?schoolId=${newSchoolId}` : '/students');
     };
 
-    const initialData = { studentId: '', fullNameKh: '', fullNameEn: '', class: selectedClass || '', gender: '', dob: '', phone: '' };
+    const initialData = { profileImage: '', studentId: '', fullNameKh: '', fullNameEn: '', class: selectedClass || '', gender: '', dob: '', phone: '' };
 
     return (
         <div className="p-4">
@@ -247,7 +263,7 @@ const Students = () => {
                 ) : isLoading ? (
                     <TableSkeleton rows={5} columns={8} />
                 ) : (
-                    <GenericTable columns={columns} data={students} />
+                    <GenericTable columns={columns} data={students} fileName="Students" />
                 )}
             </div>
         </div>

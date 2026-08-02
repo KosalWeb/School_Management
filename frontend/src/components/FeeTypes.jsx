@@ -118,7 +118,7 @@ const FeeTypes = () => {
             />
 
             <div className="bg-white p-4 rounded-lg shadow-md mt-6">
-                <GenericTable columns={columns} data={feeTypes} />
+                <GenericTable columns={columns} data={feeTypes} fileName="FeeTypes" />
             </div>
         </div>
     );
