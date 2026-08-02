@@ -79,9 +79,6 @@ const SIDEBAR_NAV = {
     icon: FaChartBar,
     items: [
       { to: '/reports', label: 'របាយការណ៍', icon: FaChartBar, roles: ['superadmin', 'school-admin'] },
-      { to: '/teacher-attendance-report', label: 'របាយការណ៍វត្តមានគ្រូ', icon: FaCalendarAlt, roles: ['superadmin', 'school-admin'] },
-      { to: '/student-attendance-report', label: 'របាយការណ៍វត្តមានសិស្ស', icon: FaClipboardList, roles: ['superadmin', 'school-admin'] },
-      { to: '/report-card', label: 'ប័ណ្ណពិន្ទុសិស្ស', icon: FaAward, roles: ['*'] },
     ],
   },
 };
