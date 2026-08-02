@@ -38,6 +38,7 @@ export const getSchools = async (req, res) => {
                     schoolName: 1,
                     schoolLevel: 1,
                     address: 1,
+                    idCardBackground: 1,
                     createdAt: 1,
                     teacherCount: 1,
                     teacherCountFemale: 1,
@@ -87,11 +88,12 @@ export const updateSchool = async (req, res) => {
     try {
         const school = await School.findById(req.params.id);
         if (school) {
-            const { schoolCode, schoolName, schoolLevel, address } = req.body;
+            const { schoolCode, schoolName, schoolLevel, address, idCardBackground } = req.body;
             if (schoolCode !== undefined) school.schoolCode = schoolCode;
             if (schoolName !== undefined) school.schoolName = schoolName;
             if (schoolLevel !== undefined) school.schoolLevel = schoolLevel;
             if (address !== undefined) school.address = address;
+            if (idCardBackground !== undefined) school.idCardBackground = idCardBackground;
             const updatedSchool = await school.save();
             res.json(updatedSchool);
         } else {

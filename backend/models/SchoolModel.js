@@ -15,6 +15,7 @@ const schoolSchema = new mongoose.Schema(
             commune: String,
             village: String,
         },
+        idCardBackground: { type: String, default: '' },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
