@@ -13,7 +13,7 @@ const SIDEBAR_ITEMS = [
   { to: '/timetable', label: 'កាលវិភាគ', icon: FaClock, roles: ['*'] },
   { to: '/teacher-evaluation', label: 'វាយតម្លៃគ្រូ', icon: FaStar, roles: ['superadmin', 'school-admin'] },
   { to: '/notifications', label: 'ការជូនដំណឹង', icon: FaEnvelope, roles: ['*'] },
-  { to: '/fee-types', label: 'ប្រភេទថ្លៃ', icon: FaMoneyBillWave, roles: ['superadmin', 'school-admin'] },
+  { to: '/fee', label: 'ប្រភេទថ្លៃ', icon: FaMoneyBillWave, roles: ['superadmin', 'school-admin'] },
   { to: '/reports', label: 'របាយការណ៍', icon: FaChartBar, roles: ['superadmin', 'school-admin'] },
 ];
 

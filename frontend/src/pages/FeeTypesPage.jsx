@@ -4,8 +4,8 @@ import FeeTypes from '../components/FeeTypes';
 import FeePayments from '../components/FeePayments';
 
 const TABS = [
-    { key: 'types', path: '/fee-types', label: 'ប្រភេទថ្លៃ' },
-    { key: 'payments', path: '/fee-types?tab=payments', label: 'ការបង់ប្រាក់' },
+    { key: 'types', path: '/fee', label: 'ប្រភេទថ្លៃ' },
+    { key: 'payments', path: '/fee?tab=payments', label: 'ការបង់ប្រាក់' },
 ];
 
 function FeeTypesPage() {
@@ -23,7 +23,7 @@ function FeeTypesPage() {
 
     const handleTabChange = (tabKey) => {
         setActiveKey(tabKey);
-        navigate(`/fee-types${tabKey === 'types' ? '' : '?tab=payments'}`);
+        navigate(`/fee${tabKey === 'types' ? '' : '?tab=payments'}`);
     };
 
     return (

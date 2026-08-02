@@ -72,7 +72,7 @@ function App() {
             <Route path="student-score" element={<StudentScorePage />} />
             <Route path="student-score-list" element={<StudentScorePage />} />
             <Route path="monthly-result" element={<StudentScorePage />} />
-            <Route path="fee-types" element={<FeeTypesPage />} />
+            <Route path="fee" element={<FeeTypesPage />} />
           </Route>
 
         </Route>
