@@ -57,7 +57,7 @@ const SIDEBAR_NAV = {
     label: 'កាលវិភាគ',
     icon: FaCalendarCheck,
     items: [
-      { to: '/timetable', label: 'កាលវិភាគបង្រៀន', icon: FaClock, roles: ['*'] },
+      { to: '/timetable', label: 'កាលវិភាគ', icon: FaClock, roles: ['*'] },
       { to: '/exam-schedule', label: 'កាលវិភាគប្រឡង', icon: FaFileSignature, roles: ['superadmin', 'school-admin'] },
       { to: '/event-calendar', label: 'ប្រតិទិនព្រឹត្តិការណ៍', icon: FaCalendarAlt, roles: ['*'] },
     ],
