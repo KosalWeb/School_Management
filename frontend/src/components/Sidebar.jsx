@@ -37,7 +37,6 @@ const SIDEBAR_NAV = {
     icon: FaUserGraduate,
     items: [
       { to: '/student-promotion', label: 'ដំឡើងថ្នាក់', icon: FaArrowUp, roles: ['superadmin', 'school-admin'] },
-      { to: '/student-id-card', label: 'ប័ណ្ណសម្គាល់', icon: FaIdCard, roles: ['*'] },
     ],
   },
   discipline: {
@@ -73,7 +72,6 @@ const SIDEBAR_NAV = {
     icon: FaMoneyBillWave,
     items: [
       { to: '/fee-types', label: 'ប្រភេទថ្លៃ', icon: FaMoneyBillWave, roles: ['superadmin', 'school-admin'] },
-      { to: '/fee-payments', label: 'ការបង់ប្រាក់', icon: FaCheckCircle, roles: ['*'] },
     ],
   },
   reports: {
@@ -81,7 +79,6 @@ const SIDEBAR_NAV = {
     icon: FaChartBar,
     items: [
       { to: '/reports', label: 'របាយការណ៍', icon: FaChartBar, roles: ['superadmin', 'school-admin'] },
-      { to: '/monthly-result', label: 'របាយការណ៍លទ្ធផលប្រចាំខែ', icon: FaPrint, roles: ['superadmin', 'school-admin'] },
       { to: '/teacher-attendance-report', label: 'របាយការណ៍វត្តមានគ្រូ', icon: FaCalendarAlt, roles: ['superadmin', 'school-admin'] },
       { to: '/student-attendance-report', label: 'របាយការណ៍វត្តមានសិស្ស', icon: FaClipboardList, roles: ['superadmin', 'school-admin'] },
       { to: '/report-card', label: 'ប័ណ្ណពិន្ទុសិស្ស', icon: FaAward, roles: ['*'] },
