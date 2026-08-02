@@ -112,13 +112,18 @@ const MonthlyResult = () => {
     const className = classes.find((c) => c._id === selectedClass)?.className || '';
     const academicYear = `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
 
-    const handlePrint = () => {
-        const rows = students
+    const splitStudents = useMemo(() => {
+        const half = Math.ceil(sortedStudents.length / 2);
+        return [sortedStudents.slice(0, half), sortedStudents.slice(half)];
+    }, [sortedStudents]);
+
+    const renderRows = (group, startIndex) =>
+        group
             .map((student, i) => {
                 const stats = studentStats[student._id];
                 return `
                     <tr>
-                        <td class="text-center">${i + 1}</td>
+                        <td class="text-center">${startIndex + i + 1}</td>
                         <td>${student.fullNameKh}</td>
                         <td class="text-center">${stats?.total ?? '-'}</td>
                         <td class="text-center">${stats?.avg ?? '-'}</td>
@@ -128,6 +133,26 @@ const MonthlyResult = () => {
             })
             .join('');
 
+    const renderTable = (group, startIndex) => `
+        <table>
+            <thead>
+                <tr>
+                    <th class="text-center">ល.រ</th>
+                    <th>គោត្តនាម និងនាម</th>
+                    <th class="text-center">សរុប</th>
+                    <th class="text-center">មធ្យម</th>
+                    <th class="text-center">ចំណាត់ថ្នាក់</th>
+                </tr>
+            </thead>
+            <tbody>${renderRows(group, startIndex)}</tbody>
+        </table>
+    `;
+
+    const handlePrint = () => {
+        const [left, right] = splitStudents;
+        const leftIndex = 0;
+        const rightIndex = left.length;
+
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
             <!DOCTYPE html>
@@ -136,7 +161,7 @@ const MonthlyResult = () => {
                 <title>របាយការណ៍លទ្ធផលប្រចាំខែ</title>
                 <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
                 <style>
-                    @page { size: A4 landscape; margin: 12mm; }
+                    @page { size: A4 portrait; margin: 12mm; }
                     body { font-family: 'Kantumruy Pro', sans-serif; font-size: 11px; color: #1a1a1a; }
                     .header { text-align: center; border-bottom: 3px double #1e40af; padding-bottom: 12px; margin-bottom: 15px; }
                     .header h1 { font-size: 20px; color: #1e40af; margin: 0 0 5px; }
@@ -145,39 +170,25 @@ const MonthlyResult = () => {
                     .info-row { font-size: 12px; }
                     .info-row span:first-child { color: #64748b; }
                     .info-row span:last-child { font-weight: 600; color: #1e293b; }
+                    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
                     table { width: 100%; border-collapse: collapse; }
                     th, td { border: 1px solid #cbd5e1; padding: 6px 8px; font-size: 11px; }
                     th { background: #1e40af; color: white; font-weight: 600; white-space: nowrap; }
                     td { color: #1e293b; }
                     .text-center { text-align: center; }
-                    .footer { text-align: center; color: #94a3b8; font-size: 10px; border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 15px; }
                 </style>
             </head>
             <body>
-                <div class="header">
-                    <h1>របាយការណ៍លទ្ធផលប្រចាំខែ</h1>
-                    <p>School Management System</p>
-                    <p>ឆ្នាំសិក្សា ${academicYear}</p>
-                </div>
                 <div class="info-grid">
                     <div class="info-row"><span>សាលា: </span><span>${schoolName || '---'}</span></div>
                     <div class="info-row"><span>ថ្នាក់: </span><span>${className || '---'}</span></div>
                     <div class="info-row"><span>ខែ: </span><span>${month}</span></div>
                     <div class="info-row"><span>ចំនួនសិស្ស: </span><span>${students.length}</span></div>
                 </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="text-center">ល.រ</th>
-                            <th>គោត្តនាម និងនាម</th>
-                            <th class="text-center">សរុប</th>
-                            <th class="text-center">មធ្យម</th>
-                            <th class="text-center">ចំណាត់ថ្នាក់</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-                <div class="footer">បង្កើតដោយប្រព័ន្ធគ្រប់គ្រងសាលារៀន • ${new Date().toLocaleString()}</div>
+                <div class="two-col">
+                    ${renderTable(left, leftIndex)}
+                    ${renderTable(right, rightIndex)}
+                </div>
                 <script>window.print(); window.close();</script>
             </body>
             </html>
@@ -265,32 +276,41 @@ const MonthlyResult = () => {
                             <FaPrint size={14} /> បោះពុម្ពលទ្ធផល
                         </button>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm border-collapse">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-3 py-3 text-left font-medium text-gray-600 border">ល.រ</th>
-                                    <th className="px-3 py-3 text-left font-medium text-gray-600 border">គោត្តនាម និងនាម</th>
-                                    <th className="px-3 py-3 text-center font-medium text-gray-600 border">សរុប</th>
-                                    <th className="px-3 py-3 text-center font-medium text-gray-600 border">មធ្យម</th>
-                                    <th className="px-3 py-3 text-center font-medium text-gray-600 border">ចំណាត់ថ្នាក់</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {sortedStudents.map((student, i) => {
-                                    const stats = studentStats[student._id];
-                                    return (
-                                        <tr key={student._id} className="hover:bg-gray-50">
-                                            <td className="px-3 py-3 border">{i + 1}</td>
-                                            <td className="px-3 py-3 border font-medium">{student.fullNameKh}</td>
-                                            <td className="px-3 py-3 border text-center font-bold text-blue-700">{stats?.total ?? '-'}</td>
-                                            <td className="px-3 py-3 border text-center font-bold text-blue-700">{stats?.avg ?? '-'}</td>
-                                            <td className="px-3 py-3 border text-center font-bold text-gray-700">{stats?.rank ?? '-'}</td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                    <div className="p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {splitStudents.map((group, gi) => {
+                                const startIndex = group === splitStudents[0] ? 0 : splitStudents[0].length;
+                                return (
+                                    <div key={gi} className="overflow-x-auto">
+                                        <table className="w-full text-sm border-collapse">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="px-3 py-3 text-left font-medium text-gray-600 border">ល.រ</th>
+                                                    <th className="px-3 py-3 text-left font-medium text-gray-600 border">គោត្តនាម និងនាម</th>
+                                                    <th className="px-3 py-3 text-center font-medium text-gray-600 border">សរុប</th>
+                                                    <th className="px-3 py-3 text-center font-medium text-gray-600 border">មធ្យម</th>
+                                                    <th className="px-3 py-3 text-center font-medium text-gray-600 border">ចំណាត់ថ្នាក់</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200">
+                                                {group.map((student, i) => {
+                                                    const stats = studentStats[student._id];
+                                                    return (
+                                                        <tr key={student._id} className="hover:bg-gray-50">
+                                                            <td className="px-3 py-3 border">{startIndex + i + 1}</td>
+                                                            <td className="px-3 py-3 border font-medium">{student.fullNameKh}</td>
+                                                            <td className="px-3 py-3 border text-center font-bold text-blue-700">{stats?.total ?? '-'}</td>
+                                                            <td className="px-3 py-3 border text-center font-bold text-blue-700">{stats?.avg ?? '-'}</td>
+                                                            <td className="px-3 py-3 border text-center font-bold text-gray-700">{stats?.rank ?? '-'}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             )}
