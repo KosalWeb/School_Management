@@ -27,7 +27,6 @@ const SIDEBAR_NAV = {
     icon: FaUserCheck,
     items: [
       { to: '/attendance', label: 'វត្តមានគ្រូ', icon: FaCheckCircle, roles: ['*'] },
-      { to: '/student-attendance', label: 'វត្តមានសិស្ស', icon: FaClipboardList, roles: ['*'] },
     ],
   },
   scores: {
