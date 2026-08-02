@@ -1,23 +1,40 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import StudentScore from '../components/StudentScore';
 import StudentScoreList from '../components/StudentScoreList';
 import MonthlyResult from '../components/MonthlyResult';
+import HonorTable from '../components/HonorTable';
 
 const TABS = [
     { key: 'input', path: '/student-score', label: 'បញ្ចូលពិន្ទុ' },
-    { key: 'list', path: '/student-score-list', label: 'បញ្ជីពិន្ទុ' },
-    { key: 'result', path: '/monthly-result', label: 'លទ្ធផលប្រចាំខែ' },
+    { key: 'list', path: '/student-score?tab=list', label: 'បញ្ជីពិន្ទុ' },
+    { key: 'result', path: '/student-score?tab=result', label: 'លទ្ធផលប្រចាំខែ' },
+    { key: 'honor', path: '/student-score?tab=honor', label: 'តារាងកិត្តិយស' },
 ];
 
 function StudentScorePage() {
     const location = useLocation();
     const navigate = useNavigate();
     const [activeKey, setActiveKey] = useState(() => {
-        if (location.pathname === '/student-score-list') return 'list';
-        if (location.pathname === '/monthly-result') return 'result';
+        const tabFromQuery = new URLSearchParams(location.search).get('tab');
+        if (tabFromQuery === 'list') return 'list';
+        if (tabFromQuery === 'result') return 'result';
+        if (tabFromQuery === 'honor') return 'honor';
         return 'input';
     });
+
+    useEffect(() => {
+        const tabFromQuery = new URLSearchParams(location.search).get('tab');
+        if (tabFromQuery === 'list') {
+            setActiveKey('list');
+        } else if (tabFromQuery === 'result') {
+            setActiveKey('result');
+        } else if (tabFromQuery === 'honor') {
+            setActiveKey('honor');
+        } else {
+            setActiveKey('input');
+        }
+    }, [location.search]);
 
     return (
         <div className="container mx-auto">
@@ -31,11 +48,10 @@ function StudentScorePage() {
                                 setActiveKey(tab.key);
                                 navigate(tab.path);
                             }}
-                            className={`px-5 py-2.5 rounded-t-lg text-sm font-medium transition-colors border-b-2 -mb-px ${
-                                isActive
-                                    ? 'bg-white text-blue-600 border-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                            }`}
+                            className={`px-5 py-2.5 rounded-t-lg text-sm font-medium transition-colors border-b-2 -mb-px ${isActive
+                                ? 'bg-white text-blue-600 border-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                                }`}
                         >
                             {tab.label}
                         </button>
@@ -45,6 +61,7 @@ function StudentScorePage() {
 
             {activeKey === 'list' && <StudentScoreList />}
             {activeKey === 'result' && <MonthlyResult />}
+            {activeKey === 'honor' && <HonorTable />}
             {activeKey === 'input' && <StudentScore />}
         </div>
     );

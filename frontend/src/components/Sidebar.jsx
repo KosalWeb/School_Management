@@ -16,10 +16,6 @@ const SIDEBAR_NAV = {
     icon: FaCog,
     items: [
       { to: '/schools', label: 'គ្រប់គ្រងសាលា', icon: FaUniversity, roles: ['superadmin', 'school-admin'] },
-      { to: '/teachers', label: 'គ្រូបង្រៀន', icon: FaChalkboardTeacher, roles: ['superadmin', 'school-admin'] },
-      { to: '/subjects', label: 'មុខវិជ្ជា', icon: FaBook, roles: ['superadmin', 'school-admin'] },
-      { to: '/classes', label: 'ថ្នាក់រៀន', icon: FaSchool, roles: ['*'] },
-      { to: '/students', label: 'សិស្ស', icon: FaUserGraduate, roles: ['*'] },
     ],
   },
   attendance: {
@@ -34,7 +30,6 @@ const SIDEBAR_NAV = {
     icon: FaPenAlt,
     items: [
       { to: '/student-score', label: 'ពិន្ទុសិស្ស', icon: FaPenAlt, roles: ['superadmin', 'school-admin'] },
-      { to: '/honor-table', label: 'តារាងកិត្តិយស', icon: FaAward, roles: ['*'] },
     ],
   },
   studentMgmt: {

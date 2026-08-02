@@ -22,7 +22,6 @@ import ReportPage from './pages/ReportPage';
 import TeacherAttendanceReportPage from './pages/TeacherAttendanceReportPage';
 import StudentAttendanceReportPage from './pages/StudentAttendanceReportPage';
 import StudentScorePage from './pages/StudentScorePage';
-import HonorTablePage from './pages/HonorTablePage';
 import ReportCardPage from './pages/ReportCardPage';
 import StudentPromotionPage from './pages/StudentPromotionPage';
 import DisciplineRecordsPage from './pages/DisciplineRecordsPage';
@@ -38,9 +37,9 @@ import FeePaymentsPage from './pages/FeePaymentsPage';
 function App() {
   return (
     <ThemeProvider>
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
 
           {/* --- General Routes (Accessible to all logged-in users) --- */}
           <Route index element={<DashboardPage />} />
@@ -48,7 +47,6 @@ function App() {
           <Route path="students" element={<StudentsPage />} />
           <Route path="attendance" element={<TeacherAttendancePage />} />
           <Route path="student-attendance" element={<StudentAttendancePage />} />
-          <Route path="honor-table" element={<HonorTablePage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="timetable" element={<TimetablePage />} />
           <Route path="fee-payments" element={<FeePaymentsPage />} />
@@ -78,7 +76,7 @@ function App() {
           </Route>
 
         </Route>
-    </Routes>
+      </Routes>
     </ThemeProvider>
   );
 }
